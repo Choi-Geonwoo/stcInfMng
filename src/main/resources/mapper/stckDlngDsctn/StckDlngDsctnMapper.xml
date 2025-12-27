@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper">
+
+    <!-- 전체 건수 -->
+    <select id="countAll" resultType="int" parameterType="map">
+        SELECT /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.countAll - 주식거래내역 */
+            COUNT(*)
+        FROM STCKDLNGDSCTN A
+        , STCKINFO B
+        , BNINFR   C
+        WHERE A.STCKTEA = B.STCKTEA
+        AND A.BNCD = C.BNCD(+)
+        AND A.DELYN = 'N'
+        <if test='start_dlngymd != null and start_dlngymd != ""'>
+            AND a.DLNGYMD  BETWEEN #{start_dlngymd} AND #{end_dlngymd}
+        </if>
+        <if test='bnCd != null and bnCd != ""'>
+            AND A.BNCD = #{bnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA = #{stckTea}
+        </if>
+        <if test='clsf != null and clsf != ""'>
+            AND A.CLSF = #{clsf}
+        </if>
+    </select>
+
+    <!-- 모든 주식거래내역 조회 -->
+    <select id="findAll" resultType="map">
+        SELECT /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.findAll - 주식거래내역 */
+        A.STCKDLNGDSCTN_NO
+        ,B.STCKNM
+        ,A.DLNGYMD
+        ,A.BNCD
+        ,C.BNNM
+        ,A.STCKTEA
+        ,A.DLNGAMT
+        ,A.DELYN
+        ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+        ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+        ,A.CLSF               /*항목구분*/
+        ,A.BYNGYN             /*매수여부*/
+        ,A.STCKCNT            /*주식수*/
+        FROM STCKDLNGDSCTN A
+        , STCKINFO B
+        , BNINFR   C
+        WHERE A.STCKTEA = B.STCKTEA
+        AND A.BNCD = C.BNCD
+        AND A.DELYN = 'N'
+        <if test='start_dlngymd != null and start_dlngymd != ""'>
+            AND a.DLNGYMD  BETWEEN #{start_dlngymd} AND #{end_dlngymd}
+        </if>
+        <if test='bnCd != null and bnCd != ""'>
+            AND A.BNCD = #{bnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA = #{stckTea}
+        </if>
+        <if test='clsf != null and clsf != ""'>
+            AND A.CLSF = #{clsf}
+        </if>
+        ORDER BY A.DLNGYMD DESC
+        <if test='offset != null and offset != ""'>
+        OFFSET #{offset} ROWS
+        </if>
+        <if test='limit != null and limit != ""'>
+        FETCH NEXT #{limit} ROWS ONLY
+        </if>
+    </select>
+
+    <!-- 특정 주식거래내역 조회 -->
+    <select id="findById" parameterType="map" resultType="map">
+        SELECT /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.findById - 주식거래내역 */
+             A.STCKDLNGDSCTN_NO
+            ,B.STCKNM
+            ,A.DLNGYMD
+            ,A.BNCD
+            ,C.BNNM
+            ,A.STCKTEA
+            ,A.DLNGAMT
+            ,A.DELYN
+            ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+            ,A.CLSF               /*항목구분*/
+            ,A.BYNGYN             /*매수여부*/
+            ,A.STCKCNT            /*주식수*/
+        FROM STCKDLNGDSCTN A
+            , STCKINFO B
+            , BNINFR   C
+        WHERE A.STCKTEA = B.STCKTEA
+           AND A.BNCD = C.BNCD
+           AND A.DELYN = 'N'
+        <if test='start_dlngymd != null and start_dlngymd != ""'>
+            AND a.DLNGYMD  BETWEEN #{start_dlngymd} AND #{end_dlngymd}
+        </if>
+        <if test='bnCd != null and bnCd != ""'>
+            AND A.BNCD = #{bnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA = #{stckTea}
+        </if>
+        <if test='clsf != null and clsf != ""'>
+            AND A.CLSF = #{clsf}
+        </if>
+        ORDER BY A.DLNGYMD DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+
+    <!-- 특정 주식거래내역 조회 -->
+    <select id="getSelectAll" parameterType="map" resultType="map">
+        SELECT
+            *
+        FROM (
+        SELECT /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.getSelectAll - 주식거래내역 */
+             B.STCKNM
+            ,A.DLNGYMD
+            ,A.BNCD
+            ,C.BNNM
+            ,A.STCKTEA
+            ,ROW_NUMBER() OVER (
+                    PARTITION BY A.STCKTEA
+                    ORDER BY A.REGDAY DESC
+            ) rn
+        FROM STCKDLNGDSCTN A
+            ,STCKINFO      B
+            ,BNINFR        C
+        WHERE A.STCKTEA = B.STCKTEA
+          AND A.BNCD = C.BNCD
+          AND A.DELYN = 'N'
+        )
+        WHERE rn = 1
+        ORDER BY VALIDATE_CONVERSION(STCKTEA AS NUMBER), STCKNM
+    </select>
+
+    <!-- 주식거래내역 생성 -->
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.insert - 주식거래내역 */
+        INSERT INTO STCKDLNGDSCTN
+        (
+            STCKDLNGDSCTN_NO,
+            DLNGYMD,
+            BNCD,
+            STCKTEA,
+            DLNGAMT,
+            DELYN,
+            REGDAY,
+            MDFCNDAY,
+            CLSF     ,          /*항목구분*/
+            BYNGYN    ,         /*매수여부*/
+            STCKCNT            /*주식수*/
+        )
+        VALUES(
+              TO_CHAR(SYSTIMESTAMP, 'SSFF3') || LPAD(stckDlngDsctn_seq.NEXTVAL, 5, 0)
+            , #{dlngymd}
+            , #{bncd}
+            , #{stcktea}
+            , #{dlngamt}
+            , #{delyn}
+            , SYSDATE
+            , SYSDATE
+            ,#{clsf}               /*항목구분*/
+            ,#{byngyn}            /*매수여부*/
+            ,#{stckcnt}            /*주식수*/
+        )
+    </insert>
+
+    <!-- 주식거래내역 정보 업데이트 -->
+    <update id="update" parameterType="map">
+        /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.update - 주식거래내역 */
+        UPDATE STCKDLNGDSCTN
+        SET
+            dlngymd = #{dlngymd},
+            bncd = #{bncd},
+            stcktea = #{stcktea},
+            dlngamt = #{dlngamt},
+            delyn = #{delyn} ,
+            MDFCNDAY = SYSDATE,
+            clsf =  #{clsf}       ,        /*항목구분*/
+            byngyn = #{byngyn}     ,       /*매수여부*/
+            stckcnt = #{stckcnt}            /*주식수*/
+        WHERE
+            STCKDLNGDSCTN_NO = #{stckDlngDsctn_no}
+    </update>
+
+    <!-- 주식거래내역 삭제 -->
+    <update id="delete" parameterType="String">
+        UPDATE /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper - 주식거래내역 */
+            STCKDLNGDSCTN
+        SET  delyn = 'Y'
+            ,MDFCNDAY = SYSDATE
+        WHERE STCKDLNGDSCTN_NO = #{stckdlngdsctn_no}
+    </update>
+
+</mapper>

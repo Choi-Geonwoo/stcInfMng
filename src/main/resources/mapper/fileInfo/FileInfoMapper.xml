@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.fileInfo.mapper.FileInfoMapper">
+
+    <!-- 모든 파일정보 조회 -->
+    <select id="findAll" resultType="map">
+        /* SQL : com.example.demo.fileInfo.mapper.FileInfoMapper - 파일정보 */
+        SELECT * 
+        FROM FILEINFO
+    </select>
+
+    <!-- 특정 파일정보 조회 -->
+    <select id="findById" parameterType="long" resultType="map">
+        /* SQL : com.example.demo.fileInfo.mapper.FileInfoMapper - 파일정보 */
+        SELECT * 
+        FROM FILEINFO
+        WHERE id = #{id}
+    </select>
+
+    <!-- 파일정보 생성 -->
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        /* SQL : com.example.demo.fileInfo.mapper.FileInfoMapper - 파일정보 */
+        INSERT INTO FILEINFO
+        (
+            FILEINFO_NO,
+            ALCTNDLNGDSCTN_NO,
+            FILENM,
+            FILEINFO,
+            DELYN,
+            REGDAY,
+            MDFCNDAY
+        )
+        VALUES(
+              TO_CHAR(SYSTIMESTAMP, 'SSFF3') || LPAD(fileInfo_seq.NEXTVAL, 5, 0)
+            , #{alctnDlngDsctn_no}
+            , #{fileName}
+            , #{fileData,jdbcType=BLOB}
+            , 'N'
+            , SYSDATE
+            , SYSDATE )
+    </insert>
+
+    <!-- 파일정보 정보 업데이트 -->
+    <update id="update" parameterType="map">
+        UPDATE FILEINFO
+            /* SQL : com.example.demo.fileInfo.mapper.FileInfoMapper - 파일정보 */
+        SET DELYN = 'Y'
+           ,MDFCNDAY = SYSDATE
+        WHERE ALCTNDLNGDSCTN_NO =#{alctnDlngDsctn_no}
+    </update>
+
+    <!-- 파일정보 삭제 -->
+    <delete id="delete" parameterType="String">
+        UPDATE FILEINFO
+            /* SQL : com.example.demo.fileInfo.mapper.FileInfoMapper - 파일정보 */
+        SET  DELYN = 'Y'
+            ,MDFCNDAY = SYSDATE
+        WHERE ALCTNDLNGDSCTN_NO =#{alctnDlngDsctn_no}
+    </delete>
+
+</mapper>

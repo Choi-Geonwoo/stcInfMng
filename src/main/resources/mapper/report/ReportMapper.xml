@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.report.mapper.ReportMapper">
+
+    <!-- 모든 투자리포트 조회 -->
+    <select id="generateReport" resultType="Map">
+        SELECT /* SQL : com.example.demo.report.mapper.ReportMapper.generateReport - 투자리포트 */
+            STCKTEA,
+            COUNT(*) AS CNT,
+            ROUND(AVG(TO_NUMBER(DLNGAMT)),2) AS AVG_DIV,
+            MAX(TO_NUMBER(DLNGAMT)) AS MAX_DIV,
+            MIN(TO_NUMBER(DLNGAMT)) AS MIN_DIV,
+            ROUND((MAX(TO_NUMBER(DLNGAMT))-MIN(TO_NUMBER(DLNGAMT)))  / NULLIF(MIN(TO_NUMBER(DLNGAMT)),0) * 100,2) AS GROWTH_RATE
+        FROM ALCTNDLNGDSCTN
+
+        <![CDATA[
+            WHERE 1=1
+              AND STCKTEA = 'SPYI'
+              AND DELYN='N'
+              AND TO_DATE(DLNGYMD,'YYYY-MM-DD') >= ADD_MONTHS(SYSDATE,-12)
+            GROUP BY STCKTEA
+        ]]>
+    </select>
+
+
+</mapper>

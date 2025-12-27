@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.stockBalance.mapper.StockBalanceMapper">
+
+
+    <!-- 모든 주식정보 조회 -->
+    <select id="countAll" resultType="int" parameterType="map">
+        SELECT /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper.countAll - 주식정보 */
+             COUNT(1)
+        FROM STCKINFO A              /*주식정보*/
+        LEFT OUTER JOIN NTNINFO B    /*국가정보*/
+          ON (A.NTNCD = B.NTNCD
+             AND B.DELYN = 'N'
+             AND B.USEYN = 'Y')
+        LEFT OUTER JOIN STOCK_BALANCE C /*주식수량*/
+          ON (a.STCKINFO_NO  = C.STCKINFO_NO)
+        WHERE A.DELYN = 'N'
+             AND A.USEYN = 'Y'
+        <if test='ntnCd != null and ntnCd != ""'>
+            AND A.NTNCD = #{ntnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA = #{stckTea}
+        </if>
+        <if test='alctn != null and alctn != ""'>
+            AND A.ALCTN = #{alctn}
+        </if>
+    </select>
+
+    <!-- 모든 주식정보 조회 -->
+    <select id="findAll" resultType="map">
+        SELECT /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper.findAll - 주식정보 */
+             A.STCKINFO_NO
+            ,C.STOCK_BALANCE_NO
+            ,A.NTNCD       /*국가코드*/
+            ,B.NTNNM       /*국가명*/
+            ,A.STCKTEA     /*주식티커*/
+            ,A.STCKNM      /*주식명*/
+            ,A.ALCTN       /*배당주기*/
+            ,NVL(C.QTY, 0) AS QTY         /*수량*/
+            ,TO_CHAR(C.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(C.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+            ,NVL(C.DELYN, 'N') AS DELYN
+        FROM STCKINFO A              /*주식정보*/
+        LEFT OUTER JOIN NTNINFO B    /*국가정보*/
+            ON (A.NTNCD = B.NTNCD
+                AND B.DELYN = 'N'
+                AND B.USEYN = 'Y')
+        LEFT OUTER JOIN STOCK_BALANCE C /*주식수량*/
+            ON (a.STCKINFO_NO  = C.STCKINFO_NO)
+        WHERE A.DELYN = 'N'
+          AND A.USEYN = 'Y'
+        <if test='ntnCd != null and ntnCd != ""'>
+            AND A.NTNCD = #{ntnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA = #{stckTea}
+        </if>
+        <if test='alctn != null and alctn != ""'>
+            AND A.ALCTN = #{alctn}
+        </if>
+        ORDER BY VALIDATE_CONVERSION(A.STCKTEA AS NUMBER), A.STCKTEA
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 특정 주식정보 조회 -->
+    <select id="findById" parameterType="long" resultType="map">
+        SELECT /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper.findById - 주식정보 */
+             A.STCKINFO_NO
+            ,C.STOCK_BALANCE_NO
+            ,A.NTNCD       /*국가코드*/
+            ,B.NTNNM       /*국가명*/
+            ,A.STCKTEA     /*주식티커*/
+            ,A.STCKNM      /*주식명*/
+            ,A.ALCTN       /*배당주기*/
+            ,NVL(C.QTY, 0) AS QTY         /*수량*/
+            ,TO_CHAR(C.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(C.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+            ,NVL(C.DELYN, 'N') AS DELYN
+        FROM STCKINFO A              /*주식정보*/
+        LEFT OUTER JOIN NTNINFO B    /*국가정보*/
+            ON (A.NTNCD = B.NTNCD
+              AND B.DELYN = 'N'
+              AND B.USEYN = 'Y')
+        LEFT OUTER JOIN STOCK_BALANCE C /*주식수량*/
+            ON (a.STCKINFO_NO  = C.STCKINFO_NO)
+        WHERE A.DELYN = 'N'
+          AND A.USEYN = 'Y'
+        <if test='ntnCd != null and ntnCd != ""'>
+            AND A.NTNCD = #{ntnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA = #{stckTea}
+        </if>
+        <if test='alctn != null and alctn != ""'>
+            AND A.ALCTN = #{alctn}
+        </if>
+        ORDER BY VALIDATE_CONVERSION(A.STCKTEA AS NUMBER), A.STCKTEA
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 주식정보 생성 -->
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        INSERT  /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper - 주식정보 insert */
+            INTO STOCK_BALANCE
+        (
+            STOCK_BALANCE_NO,
+            STCKINFO_NO,
+            QTY,
+            DELYN,
+            REGDAY,
+            MDFCNDAY
+        )
+        VALUES(
+            TO_CHAR(SYSTIMESTAMP, 'SSFF3') || LPAD(stock_balance_seq.NEXTVAL, 5, 0),
+            #{stckinfo_no},
+            #{qty},
+            'N' ,
+            SYSDATE ,
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 주식정보 정보 업데이트 -->
+    <update id="update" parameterType="map">
+        /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper - 주식정보 update */
+        update STOCK_BALANCE
+        set QTY = #{qty}
+           ,DELYN = #{delyn}
+        where STOCK_BALANCE_NO = #{stock_balance_no}
+    </update>
+
+    <!-- 주식정보 삭제 -->
+    <delete id="delete" parameterType="String">
+        /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper - 주식정보 delete */
+        delete from  STOCK_BALANCE
+        where STOCK_BALANCE_NO = #{stock_balance_no}
+    </delete>
+
+
+    <!-- 상세 주식정보 조회 -->
+    <select id="dlls" resultType="map">
+        SELECT  /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper.dlls - 주식 상세정보 */
+              C.STCKINFO_NO
+            , A.DLNGYMD                /* 거래 년월 */
+            , C.STCKNM                  /* 주식명 */
+            , A.DVDND                   /* 배당금 */
+            , A.DLNGAMT                 /* 거래금액 */
+            , B.NTNNM                   /* 국가명*/
+            , C.BNNM
+            , SUM( A.DLNGAMT) OVER() AS TOT_SUN
+        FROM ALCTNDLNGDSCTN A /* 배당거래내역 테이블 */
+        INNER JOIN STCKINFO C /* 주식정보 테이블 */
+            ON A.STCKTEA = C.STCKTEA /* 주식티커로 조인 */
+        LEFT OUTER JOIN
+        (
+            SELECT /* SQL : COM.EXAMPLE.DEMO.ALCTNDLNGDSCTN.MAPPER.ALCTNDLNGDSCTNMAPPER  - 주식정보 */
+                 B.NTNNM
+                ,A.STCKTEA
+                ,A.STCKNM
+            FROM STCKINFO A           /*주식정보*/
+            LEFT OUTER JOIN NTNINFO B /*국가정보*/
+                ON (A.NTNCD = B.NTNCD
+                  AND B.DELYN='N')
+        ) B
+            ON A.STCKTEA = B.STCKTEA
+        LEFT OUTER JOIN  BNINFR  C
+            ON (A.BNCD  = C.BNCD
+                AND C.DELYN='N')
+        WHERE 1=1 /* 항상 참인 조건으로 시작 */
+            AND C.STCKINFO_NO = #{stckinfo_no}
+        ORDER BY A.DLNGYMD
+    </select>
+</mapper>

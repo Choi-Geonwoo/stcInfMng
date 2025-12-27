@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주식거래내역</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/com/com.css}">
+    <script type="module" th:src="@{/JS/stckDlngDsctn/stckDlngDsctn.js}" defer></script>
+    <script type="text/javascript" th:src="@{/JS/com/comUitl.js}" defer></script>
+    <script type="text/javascript" th:src="@{/JS/com/todayUitl.js}" defer></script>
+<!--    <script type="text/javascript" th:src="@{/JS/util/fetchUtil.js}" defer></script>-->
+
+    <style>
+
+    </style>
+</head>
+<body>
+
+<!-- parent.html -->
+<div th:replace="./view/fragments/header :: headerFragment"></div>
+
+<section class="card register">
+    <h2>주식거래내역 - 등록 영역</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="dlngYmd">거래일자</label>
+                <input type="date" id="dlngYmd" name="dlngYmd" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+            </div>
+
+            <div class="form-group">
+                <label for="clsf">항목구분</label>
+                <select class="input" id="clsf" name="clsf">
+                    <option value="">항목 선택</option>
+                    <option value="1">연금저축</option>
+                    <option value="2">퇴직연금</option>
+                    <option value="3">일반계좌</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="byngyn">매수여부</label>
+                <select class="input" id="byngyn" name="byngyn">
+                    <option value="">선택</option>
+                    <option value="Y">매수</option>
+                    <option value="N">매도</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="bnCd">은행명</label>
+                <select class="input" id="bnCd" name="bnCd">
+                    <option value="">은행 선택</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="stckTea">주식명</label>
+                <select class="input" id="stckTea" name="stckTea">
+                    <option value="">주식 선택</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="stckcnt">주식수</label>
+                <input type="text" id="stckcnt" name="stckcnt" >
+            </div>
+
+            <div class="form-group">
+                <label for="dlngAmt">거래금액</label>
+                <input type="text" id="dlngAmt" name="dlngAmt" >
+            </div>
+
+            <div class="form-group">
+                <label for="delYn">삭제</label>
+                <select class="input" id="delYn" name="delYn">
+                    <option value="Y">예</option>
+                    <option value="N" selected>아니요</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div style="margin-top:16px; text-align:right;">
+            <button type="button" id="submitBtn" class="btn btn-add">등록하기</button>
+        </div>
+</section>
+
+
+<section class="card search">
+    <h2>검색 영역</h2>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>시작일자</label>
+            <input type="date" id="s_start_dlngYmd" name="s_start_dlngYmd" th:value="${#temporals.format(#temporals.createNow().minusDays(6), 'yyyy-MM-dd')}">
+        </div>
+
+        <div class="form-group">
+            <label>종료일자</label>
+            <input type="date" id="s_end_dlngYmd" name="s_end_dlngYmd" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+        </div>
+
+        <div class="form-group">
+            <label for="s_bnCd">은행명</label>
+            <select class="input" id="s_bnCd" name="s_bnCd">
+                <option value="">전체</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="s_stckTea">주식명</label>
+            <select class="input" id="s_stckTea" name="s_stckTea">
+                <option value="">전체</option>
+            </select>
+        </div>
+
+
+        <div class="form-group">
+            <label for="s_clsf">항목구분</label>
+            <select class="input" id="s_clsf" name="s_clsf">
+                <option value="">항목 선택</option>
+                <option value="1">연금저축</option>
+                <option value="2">퇴직연금</option>
+                <option value="3">일반계좌</option>
+            </select>
+        </div>
+    </div>
+
+    <div style="margin-top:16px; text-align:right;">
+        <button type="button" id="searchBtn" class="btn btn-search">검색하기</button>
+        <button type="button" id="excelBtn" class="btn btn-excel">엑셀 다운로드</button>
+    </div>
+</section>
+
+<!--<section class="card list-grid">
+    <div class="item" onclick="openModal()">항목 1</div>
+    <div class="item" onclick="openModal()">항목 2</div>
+    <div class="item" onclick="openModal()">항목 3</div>
+    <div class="item" onclick="openModal()">항목 4</div>
+    <div class="item" onclick="openModal()">항목 5</div>
+    <div class="item" onclick="openModal()">항목 6</div>
+</section>-->
+
+
+<section class="card">
+    <h2>데이터 테이블 <span id="countVal"></span> </h2>
+    <div class="table-wrapper">
+        <table id="bankTable">
+            <thead>
+            <tr>
+                <th >ID</th>
+                <th data-key="DLNGYMD">거래일자</th>
+                <th data-key="CLSF">항목구분</th>
+                <th data-key="BYNGYN">매수여부</th>
+                <th data-key="BNNM">은행명</th>
+                <th data-key="STCKNM">주식명</th>
+                <th data-key="STCKCNT">주식수</th>
+                <th data-key="DLNGAMT">거래금액</th>
+                <th data-key="DELYN">삭제여부</th>
+                <th>관리</th> <!-- ❌ key 없음 → 자동 제외 -->
+            </tr>
+            </thead>
+            <tbody id="bankList"></tbody>
+        </table>
+    </div>
+</section>
+
+
+<!--<div class="pagination">-->
+<!--    <button>이전</button>-->
+<!--    <button>1</button>-->
+<!--    <button>2</button>-->
+<!--    <button>3</button>-->
+<!--    <button>다음</button>-->
+<!--</div>-->
+<div class="pagination" id="pagination"></div>
+
+</body>
+</html>

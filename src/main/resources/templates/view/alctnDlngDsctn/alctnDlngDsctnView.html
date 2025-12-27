@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배당거래내역</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/com/com.css}">
+    <script type="module"   th:src="@{/JS/alctnDlngDsctn/alctnDlngDsctn.js}" defer></script>
+    <script type="text/javascript" th:src="@{/JS/com/comUitl.js}" defer></script>
+
+    <!-- Chart.js로 차트 그리기 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!--<script type="text/javascript" th:src="@{/JS/util/fetchUtil.js}" defer></script>-->
+
+    <style>
+
+    </style>
+</head>
+<body>
+
+<!-- parent.html -->
+<div th:replace="./view/fragments/header :: headerFragment"></div>
+
+<section class="card register">
+    <h2>배당거래내역 - 등록 영역</h2>
+
+        <div style="margin-top:16px; text-align:right;">
+            <!--<button type="button" onclick="openModal()" class="btn btn-add">등록하기</button>-->
+            <button type="button" id="registerBtn" class="btn btn-add">등록하기</button>
+        </div>
+</section>
+
+
+<section class="card search">
+    <h2>검색 영역</h2>
+
+
+    <div class="form-grid">
+
+        <div class="form-group">
+            <label for="s_dlngYmd">거래년월</label>
+            <select id="s_dlngYmd" class="input">
+                <option value="">전체</option>
+                <option th:each="i : ${#numbers.sequence(2020, #dates.year(#dates.createNow()))}"
+                        th:value="${i}" th:text="${i}"
+                        th:selected="${parameter != null and i == T(java.lang.Integer).parseInt(parameter.year)}">
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="s_month">거래월</label>
+            <!--<input type="month" id="s_dlngYmd"  name="s_dlngYmd">-->
+            <select id="s_month" class="input">
+                <option value="">전체</option>
+                <option th:each="i : ${#numbers.sequence(1, 12)}"
+                        th:value="${i}"
+                        th:text="${i + '월'}">
+                </option>
+            </select>
+        </div>
+
+
+        <div class="form-group">
+            <label for="s_ntnCd">국가명</label>
+            <select id="s_ntnCd" class="input">
+                <option value="">전체</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="s_stckTea">주식명</label>
+            <select id="s_stckTea" class="input">
+                <option value="">전체</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="s_bnCd">은행명</label>
+            <select id="s_bnCd" class="s_bnCd">
+                <option value="">전체</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div style="margin-top:16px; text-align:right;">
+        <button type="button" id="searchBtn" class="btn btn-search">검색하기</button>
+    </div>
+</section>
+
+<!--<section class="card list-grid">
+    <div class="item" onclick="openModal()">항목 1</div>
+    <div class="item" onclick="openModal()">항목 2</div>
+    <div class="item" onclick="openModal()">항목 3</div>
+    <div class="item" onclick="openModal()">항목 4</div>
+    <div class="item" onclick="openModal()">항목 5</div>
+    <div class="item" onclick="openModal()">항목 6</div>
+</section>-->
+
+
+<section class="data-card">
+
+    <!-- ========== 탭 메뉴 ========== -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-data">데이터 테이블</button>
+        <button class="tab-btn" data-tab="tab-weekly">주간 테이블</button>
+        <button class="tab-btn" data-tab="tab-month">월간 테이블</button>
+        <!--<button class="tab-btn" data-tab="tab-graph">월간 그래프</button>-->
+    </div>
+
+    <!-- ========== 탭 콘텐츠 ========== -->
+    <div class="tab-content active" id="tab-data">
+        <div class="data-wrapper">
+            <div class="data-table">
+                <div class="data-body" id="dataList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="tab-month">
+        <h3>월간 테이블 내용</h3>
+        <!-- 기존 월간 테이블 들어갈 자리 -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>년도</th>
+                    <th>01월</th>
+                    <th>02월</th>
+                    <th>03월</th>
+                    <th>04월</th>
+                    <th>05월</th>
+                    <th>06월</th>
+                    <th>07월</th>
+                    <th>08월</th>
+                    <th>09월</th>
+                    <th>10월</th>
+                    <th>11월</th>
+                    <th>12월</th>
+                    <th>합계</th>
+                </tr>
+                </thead>
+                <tbody id="bankList"></tbody>
+            </table>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="monthlyChart" style="width: 100%; height: 350px;"></canvas>
+        </div>
+    </div>
+    <div class="tab-content" id="tab-weekly">
+        <h3>주간 테이블 내용</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>배당일자</th>
+                    <th>국가명</th>
+                    <th>주식명</th>
+                    <th>배당금</th>
+                    <th>거래금액</th>
+                </tr>
+                </thead>
+                <tbody id="weeklyList"></tbody>
+            </table>
+        </div>
+        <br/>
+        <!-- 페이징 -->
+        <div class="pagination" id="pagination"></div>
+    </div>
+</section>
+
+
+
+
+
+<!--<div class="pagination">
+    <button>이전</button>
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button>다음</button>
+</div>-->
+
+<!-- 모달 -->
+<div id="modalOverlay" class="modal-overlay">
+    <div class="modal-box">
+        <!-- 모달 헤더 -->
+        <header class="modal-header">
+            <h2>상세 입력</h2>
+            <!--<button type="button" class="modal-close-btn" onclick="closeModal()">✕</button>-->
+            <!-- 닫기 버튼 -->
+            <button type="button" class="modal-close-btn">✕</button>
+        </header>
+
+        <!-- 모달 본문 -->
+        <div class="modal-body">
+
+            <table class="modal-table">
+                <tr>
+                    <td colspan="2">
+                        <label for="stckTea">주식명</label>
+                        <select id="stckTea" class="input">
+                            <!--<option value="">선택하세요</option>-->
+                        </select>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <label for="bnCd">은행명</label>
+                        <select id="bnCd" class="input">
+                            <!--<option value="">선택하세요</option>-->
+                        </select>
+                    </td>
+                    <td>
+                        <label for="dlngYmd">거래일자</label>
+                        <input type="date" id="dlngYmd" class="input" name="dlngYmd">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <label for="dlngAmt">거래금액</label>
+                        <input type="text" id="dlngAmt" class="input" placeholder="입력하세요">
+                    </td>
+                    <td>
+                        <label for="dvdnd">배당금</label>
+                        <input type="text" id="dvdnd" class="input" placeholder="입력하세요">
+                    </td>
+                </tr>
+            </table>
+
+            <!-- 파일 선택 -->
+            <div class="form-group">
+                <label>파일 첨부</label>
+                <div class="file-input-wrapper">
+                    <button type="button" class="btn-file" onclick="document.getElementById('realFile').click()">파일 선택</button>
+                    <span id="fileName" class="file-name">선택된 파일이 없습니다.</span>
+                </div>
+                <input type="file" id="realFile" class="file-hidden" accept="image/*">
+            </div>
+
+            <!-- 이미지 미리보기 -->
+            <div class="form-group">
+                <label>이미지 미리보기</label>
+                <div class="img-preview-box">
+                    <img id="previewImg" alt="Preview">
+                </div>
+            </div>
+        </div>
+
+        <!-- 모달 푸터 -->
+        <footer class="modal-footer">
+            <!--<button type="button" class="btn btn-cancel" onclick="closeModal()">취소</button>
+            <button type="button" class="btn btn-save" onclick="submitModal()" >저장</button>-->
+            <!-- 취소 버튼 -->
+            <button type="button" class="btn btn-cancel">취소</button>
+
+            <!-- 저장 버튼 -->
+            <button type="button" id="btn-save" class="btn btn-save">저장</button>
+
+            <!-- 삭제 버튼 -->
+            <button type="button" id="btn-delete" class="btn btn-delete display_none">삭제</button>
+
+            <!-- 수정 버튼 -->
+            <button type="button" id="btn-edit" class="btn btn-edit display_none">수정</button>
+        </footer>
+    </div>
+</div>
+
+
+</body>
+</html>

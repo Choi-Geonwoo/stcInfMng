@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http//www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material UI Layout</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/com/com.css}">
+
+    <style>
+
+    </style>
+</head>
+<body>
+<div th:fragment="headerFragment">
+<header>
+    <!--Material Design UI-->
+    <nav class="menu-bar">
+        <ul>
+            <li><a href="/">홈</a></li>
+            <li><a href="/stockBalance/">주식수량관리</a></li>
+            <li><a href="/bninfr/">은행정보</a></li>
+            <li><a href="/ntnInfo/">국가정보</a></li>
+            <li><a href="/stckInfo/">주식정보</a></li>
+            <li><a href="/stckDlngDsctn/">주식거래내역</a></li>
+            <li><a href="/alctnDlngDsctn/">배당거래내역</a></li>
+            <li><a href="/dlngDsctnClnd/">거래내역달력</a></li>
+        </ul>
+    </nav>
+</header>
+</div>
+</body>
+</html>

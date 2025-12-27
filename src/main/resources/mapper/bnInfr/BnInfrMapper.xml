@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.bnInfr.mapper.BnInfrMapper">
+
+    <!--
+        모든 은행정보 조회
+    -->
+    <select id="findAll" parameterType="map" resultType="map">
+        /* SQL : com.example.demo.bnInfr.mapper.bnInfrMapper.findAll - 은행정보 */
+        SELECT
+          BNINFR_NO   /* 은행 고유 번호 */
+        , BNCD       /* 은행 코드 */
+        , BNNM
+        , USEYN
+        , DELYN
+        ,TO_CHAR(REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+        ,TO_CHAR(MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+        FROM bnInfr
+        WHERE 1=1
+        <if test='bnCd != null and bnCd != ""'>
+            AND BNCD = #{bnCd}
+        </if>
+
+        <if test='bnNm != null and bnNm != ""'>
+            AND BNNM LIKE '%'|| #{bnNm} || '%'
+        </if>
+    </select>
+
+    <!--
+        특정 은행정보 조회
+    -->
+    <select id="findById" parameterType="long" resultType="map">
+        /* SQL : com.example.demo.bnInfr.mapper.bnInfrMapper.findById - 은행정보 */
+        SELECT
+              BNINFR_NO   /* 은행 고유 번호 */
+            , BNCD        /* 은행 코드 */
+            , BNNM
+            , USEYN
+            , DELYN
+            ,TO_CHAR(REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+        FROM bnInfr
+        WHERE BNINFR_NO = #{bninfr_no}
+    </select>
+
+    <!--
+        은행정보 생성
+    -->
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO BNINFR /* SQL : com.example.demo.bnInfr.mapper.bnInfrMapper.insert - 은행정보 */
+            (
+              BNINFR_NO    /* 은행 고유 번호 */
+            , BNCD         /* 은행 코드 */
+            , BNNM
+            , USEYN
+            , DELYN
+            , REGDAY
+            , MDFCNDAY
+        )
+        VALUES
+            (
+            /* 은행 고유 번호 */
+          TO_CHAR(SYSTIMESTAMP, 'SSFF3') || LPAD(bnInfr_seq.NEXTVAL, 5, 0)
+        , #{bnCd}
+        , #{bnNm}
+        , #{useYn}
+        , #{delYn}
+        , SYSDATE
+        , SYSDATE )
+    </insert>
+
+    <!--
+        은행정보 정보 업데이트
+    -->
+    <update id="update" parameterType="map">
+        /* SQL : com.example.demo.bnInfr.mapper.bnInfrMapper.update - 은행정보 */
+        UPDATE BNINFR
+        SET   bncd = #{bncd} /* 은행 코드 */
+            , bnnm=#{bnnm}
+            , useyn=#{useyn}
+            , delyn=#{delyn}
+            , mdfcnday=sysdate
+        WHERE BNINFR_NO=#{bninfr_no}
+    </update>
+
+    <!--
+        은행정보 삭제
+    -->
+    <delete id="delete" parameterType="String">
+        /* SQL : com.example.demo.bnInfr.mapper.bnInfrMapper - 은행정보 */
+        DELETE FROM BNINFR
+        /* 은행 고유 번호 */
+        WHERE BNINFR_NO=#{bninfr_no}
+    </delete>
+
+</mapper>

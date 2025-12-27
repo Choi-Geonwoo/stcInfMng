@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.stckInfo.mapper.StckInfoMapper">
+
+
+    <!-- 모든 주식정보 조회 -->
+    <select id="countAll" resultType="int" parameterType="map">
+        SELECT /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper.countAll - 주식정보 건수 */
+           COUNT(1)
+        FROM STCKINFO A
+        LEFT OUTER JOIN NTNINFO B
+            ON (A.NTNCD = B.NTNCD
+                AND B.DELYN = 'N'
+                AND B.USEYN = 'Y')
+        WHERE   A.DELYN = 'N'
+            AND A.USEYN = 'Y'
+        <if test='ntnCd != null and ntnCd != ""'>
+            AND A.NTNCD = #{ntnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND STCKTEA LIKE '%' || #{stckTea} || '%'
+        </if>
+        <if test='stckNm != null and stckNm != ""'>
+            AND STCKNM LIKE '%' || #{stckNm} || '%'
+        </if>
+        <if test='alctn != null and alctn != ""'>
+            AND ALCTN LIKE '%' || #{alctn} || '%'
+        </if>
+    </select>
+
+    <!-- 모든 주식정보 조회 -->
+    <select id="findAll" resultType="map">
+        SELECT /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper.findAll - 주식정보 */
+             A.STCKINFO_NO
+            ,A.NTNCD
+            ,B.NTNNM
+            ,A.STCKTEA
+            ,A.STCKNM
+            ,A.ALCTN
+            ,A.USEYN
+            ,A.DELYN
+            ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+        FROM STCKINFO A
+        LEFT OUTER JOIN NTNINFO B
+        ON (A.NTNCD = B.NTNCD
+            AND B.DELYN = 'N'
+            AND B.USEYN = 'Y')
+        WHERE A.DELYN = 'N'
+          AND A.USEYN = 'Y'
+        ORDER BY B.NTNNM
+        <if test='offset != null and offset != ""'>
+            OFFSET #{offset} ROWS
+        </if>
+        <if test='limit != null and limit != ""'>
+            FETCH NEXT #{limit} ROWS ONLY
+        </if>
+    </select>
+
+    <!-- 특정 주식정보 조회 -->
+    <select id="findById" parameterType="long" resultType="map">
+        SELECT /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper.findById - 주식정보 */
+             A.STCKINFO_NO
+            ,A.NTNCD
+            ,B.NTNNM
+            ,A.STCKTEA
+            ,A.STCKNM
+            ,A.ALCTN
+            ,A.USEYN
+            ,A.DELYN
+            ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+        FROM STCKINFO A
+        LEFT OUTER JOIN NTNINFO B
+        ON (A.NTNCD = B.NTNCD
+            AND B.DELYN = 'N'
+            AND B.USEYN = 'Y')
+        WHERE A.DELYN = 'N'
+          AND A.USEYN = 'Y'
+        <if test='ntnCd != null and ntnCd != ""'>
+            AND A.NTNCD = #{ntnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA LIKE '%' || #{stckTea} || '%'
+        </if>
+        <if test='stckNm != null and stckNm != ""'>
+            AND A.STCKNM LIKE '%' || #{stckNm} || '%'
+        </if>
+        <if test='alctn != null and alctn != ""'>
+            AND A.ALCTN LIKE '%' || #{alctn} || '%'
+        </if>
+        ORDER BY B.NTNNM
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 주식정보 생성 -->
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper.insert - 주식정보 insert */
+        INSERT  INTO STCKINFO
+        (
+            STCKINFO_NO,
+            NTNCD,
+            STCKTEA,
+            STCKNM,
+            ALCTN,
+            USEYN,
+            DELYN,
+            REGDAY,
+            MDFCNDAY
+        )
+        VALUES(
+              TO_CHAR(SYSTIMESTAMP, 'SSFF3') || LPAD(stckInfo_seq.NEXTVAL, 5, 0)
+            , #{ntncd}
+            , #{stcktea}
+            , #{stcknm}
+            , #{alctn}
+            , #{useyn}
+            , #{delyn}
+            , SYSDATE
+            , SYSDATE
+        )
+    </insert>
+
+    <!-- 주식정보 정보 업데이트 -->
+    <update id="update" parameterType="map">
+        /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper.update - 주식정보 update */
+        UPDATE STCKINFO
+        SET
+             NTNCD      = #{ntncd}
+            ,STCKTEA    = #{stcktea}
+            ,STCKNM     = #{stcknm}
+            ,ALCTN      = #{alctn}
+            ,USEYN      = #{useyn}
+            ,DELYN      = #{delyn}
+            ,MDFCNDAY   = SYSDATE
+        WHERE STCKINFO_NO = #{stckInfo_no}
+    </update>
+
+    <!-- 주식정보 삭제 -->
+    <delete id="delete" parameterType="String">
+        /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper - 주식정보 delete */
+        DELETE FROM STCKINFO
+        WHERE STCKINFO_NO = #{stckInfo_no}
+    </delete>
+
+</mapper>

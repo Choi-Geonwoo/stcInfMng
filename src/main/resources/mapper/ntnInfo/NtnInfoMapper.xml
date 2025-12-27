@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.ntnInfo.mapper.NtnInfoMapper">
+
+    <!-- 모든 국가정보 조회 -->
+    <select id="findAll" parameterType="map"  resultType="map" >
+        /* SQL : com.example.demo.ntnInfo.mapper.NtnInfoMapper.findAll - 국가정보 */
+        SELECT
+             NTNINFO_NO
+            ,NTNCD
+            ,NTNNM
+            ,USEYN
+            ,DELYN
+            ,TO_CHAR(REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+        FROM NTNINFO
+        WHERE 1=1
+        <if test='ntnCd != null and ntnCd != ""'>
+            AND NTNCD LIKE '%'||  #{ntnCd} || '%'
+        </if>
+        <if test='ntnNm != null and ntnNm != ""'>
+            AND NTNNM LIKE '%'|| #{ntnNm} || '%'
+        </if>
+        <if test='useYn != null and useYn != ""'>
+            AND USEYN = #{useYn}
+        </if>
+        <if test='delYn != null and delYn != ""'>
+            AND DELYN = #{delYn}
+        </if>
+    </select>
+
+    <!-- 특정 국가정보 조회 -->
+    <select id="findById" parameterType="long" resultType="map">
+        /* SQL : com.example.demo.ntnInfo.mapper.NtnInfoMapper.findById - 국가정보 */
+        SELECT * 
+        FROM NTNINFO
+        WHERE NTNINFO_NO = #{id}
+    </select>
+
+    <!-- 국가정보 생성 -->
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        /* SQL : com.example.demo.ntnInfo.mapper.NtnInfoMapper.insert - 국가정보 */
+        INSERT INTO NTNINFO
+        (
+            NTNINFO_NO,
+            NTNCD,
+            NTNNM,
+            USEYN,
+            DELYN,
+            REGDAY,
+            MDFCNDAY
+        )
+        VALUES(
+              TO_CHAR(SYSTIMESTAMP, 'SSFF3') || LPAD(ntnInfo_seq.NEXTVAL, 5, 0)
+            , #{ntncd}
+            , #{ntnnm}
+            , #{useyn}
+            , #{delyn}
+            , SYSDATE
+            , SYSDATE
+        )
+    </insert>
+
+    <!-- 국가정보 정보 업데이트 -->
+    <update id="update" parameterType="map">
+        /* SQL : com.example.demo.ntnInfo.mapper.NtnInfoMapper.update - 국가정보 */
+        UPDATE NTNINFO
+        SET
+          NTNCD=#{ntncd}
+        , NTNNM=#{ntnnm}
+        , USEYN=#{useyn}
+        , DELYN=#{delyn}
+        , MDFCNDAY=SYSDATE
+        WHERE NTNINFO_NO = #{ntnInfo_no}
+    </update>
+
+    <!-- 국가정보 삭제 -->
+    <delete id="delete" parameterType="String">
+        /* SQL : com.example.demo.ntnInfo.mapper.NtnInfoMapper - 국가정보 */
+        DELETE FROM NTNINFO
+        WHERE NTNINFO_NO = #{ntnInfo_no}
+    </delete>
+
+</mapper>

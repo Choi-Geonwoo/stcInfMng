@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.dlngDsctnClnd.mapper.DlngDsctnClndMapper">
+
+    <!-- 모든 거래내역달력 조회 -->
+    <select id="findAll" resultType="map">
+        SELECT  /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper - 배당거래내역 */
+              A.ALCTNDLNGDSCTN_NO  as id    /*순번*/
+            , A.DLNGYMD AS "start"               /* 년도+월*/
+            , B.BNNM || ' -'||C.STCKNM    AS "title"              /* 주식명 */
+            , A.DVDND                       /*배당금*/
+            , A.DLNGAMT                     /*거래금액*/
+        FROM ALCTNDLNGDSCTN A
+        INNER JOIN BNINFR B
+            ON B.BNCD = A.BNCD
+        INNER JOIN STCKINFO C
+            ON A.STCKTEA = C.STCKTEA
+        WHERE 1=1
+          AND A.DELYN = 'N'
+        ORDER BY
+            A.DLNGYMD,
+            C.STCKNM
+    </select>
+
+    <!-- 특정 거래내역달력 조회 -->
+    <select id="findById" parameterType="long" resultType="map">
+        SELECT /* SQL : com.example.demo.dlngDsctnClnd.mapper.DlngDsctnClndMapper.findById - 거래내역달력 조회*/
+            co001,
+ co002,
+ co003,
+ co004
+        FROM table
+        WHERE id = #{id}
+    </select>
+
+    <!-- 거래내역달력 생성 -->
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        INSERT  /* SQL : com.example.demo.dlngDsctnClnd.mapper.DlngDsctnClndMapper.insert - 거래내역달력 생성*/
+            INTO table (co001, co002, co003, co004)
+        VALUES (#{co001}, #{co002}, #{co003}, #{co004})
+    </insert>
+
+    <!-- 거래내역달력 정보 업데이트 -->
+    <update id="update" parameterType="map">
+        UPDATE  /* SQL : com.example.demo.dlngDsctnClnd.mapper.DlngDsctnClndMapper.update - 거래내역달력 업데이트*/
+            table
+        SET co001 = #{co001}, co002 = #{co002}, co003 = #{co003}, co004 = #{co004}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 거래내역달력 삭제 -->
+    <delete id="delete" parameterType="long">
+        DELETE /* SQL : com.example.demo.dlngDsctnClnd.mapper.DlngDsctnClndMapper.delete - 거래내역달력 삭제*/ 
+            FROM table
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

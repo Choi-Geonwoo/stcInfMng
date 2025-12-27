@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dashboard.mapper.DashboardMapper">
+
+    <!--
+        쿼리명: getSummary
+        설명: 대시보드 KPI 요약 정보를 조회합니다.
+
+        대시보드 KPI 요약 정보를 조회합니다.
+        총 투자 금액, 총 배당 금액, 총 주식 종목 수를 반환합니다.
+    -->
+    <select id="getSummary" resultType="map">
+        SELECT
+            SUM(total_invest) AS totalInvest,
+            SUM(total_dividend) AS totalDividend,
+            ROUND(AVG(total_dividend),2) AS avgDividend,
+            COUNT(*) AS stockCount
+        FROM (
+            SELECT
+                    S.STCKTEA,
+                    SUM(TO_NUMBER(REGEXP_REPLACE(S.DLNGAMT, '[^0-9\.-]', ''), '9999999990D999999', 'NLS_NUMERIC_CHARACTERS=.,')) AS total_invest,
+                    SUM(TO_NUMBER(REGEXP_REPLACE(A.DVDND, '[^0-9\.-]', ''), '9999999990D999999', 'NLS_NUMERIC_CHARACTERS=.,')) AS total_dividend
+            FROM STCKDLNGDSCTN S
+            LEFT JOIN ALCTNDLNGDSCTN A
+                ON S.STCKTEA = A.STCKTEA
+            WHERE S.DELYN = 'N'
+            GROUP BY S.STCKTEA
+        ) t
+    </select>
+
+    <!--
+        쿼리명: getMonthly
+        설명: 월별 투자 및 배당 정보를 조회합니다.
+
+        월별 투자 및 배당 정보를 조회합니다.
+        연월, 월별 배당금, 월별 매수 금액, 월별 매도 금액을 반환합니다.
+    -->
+    <select id="getMonthly" resultType="map">
+        SELECT /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getMonthly - 대시보드 월별 투자 및 배당 정보 */
+            SUBSTR(S.DLNGYMD,1,7) AS ym,
+            SUM(TO_NUMBER(REGEXP_REPLACE(A.DVDND,'[^0-9\.-]',''),'9999999990D999999','NLS_NUMERIC_CHARACTERS=.,')) AS dividend,
+            SUM(CASE WHEN S.BYNGYN='Y' THEN TO_NUMBER(REGEXP_REPLACE(S.DLNGAMT,'[^0-9\.-]',''),'9999999990D999999','NLS_NUMERIC_CHARACTERS=.,') ELSE 0 END) AS buy,
+            SUM(CASE WHEN S.BYNGYN='N' THEN TO_NUMBER(REGEXP_REPLACE(S.DLNGAMT,'[^0-9\.-]',''),'9999999990D999999','NLS_NUMERIC_CHARACTERS=.,') ELSE 0 END) AS sell
+        FROM STCKDLNGDSCTN S
+        LEFT JOIN ALCTNDLNGDSCTN A ON S.STCKTEA=A.STCKTEA
+        WHERE S.DELYN='N'
+        GROUP BY SUBSTR(S.DLNGYMD,1,7)
+        ORDER BY ym
+    </select>
+
+    <!--
+        쿼리명: getStockRank
+        설명: 주식별 투자 랭킹을 조회합니다.
+
+        주식별 투자 랭킹을 조회합니다.
+        주식 코드, 주식명, 총 투자 금액, 총 배당 금액, 현재 보유 수량을 기준으로 상위 10개 종목을 반환합니다.
+    -->
+    <select id="getStockRank" resultType="map">
+        SELECT  /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getMonthly - 대시보드 주식별 투자 랭킹 */
+            *
+        FROM (
+            SELECT
+                  i.STCKTEA  /* 주식티커 */
+                , i.STCKNM   AS name /* 주식명  */
+                , N.NTNNM    AS country
+                , sum(A.DLNGAMT) AS invest
+                , max(nvl(b.qty, 0)) AS qty
+                , ROW_NUMBER() OVER(PARTITION BY N.NTNNM ORDER BY sum(A.DLNGAMT) DESC) AS RN
+            FROM STCKINFO I
+            LEFT JOIN ALCTNDLNGDSCTN A
+                ON I.STCKTEA = A.STCKTEA
+                   AND A.DELYN = 'N'
+            LEFT JOIN STOCK_BALANCE B
+                ON I.STCKINFO_NO = B.STCKINFO_NO
+                    AND B.DELYN = 'N'
+            LEFT JOIN NTNINFO N
+                ON  I.NTNCD = N.NTNCD
+                    AND N.DELYN = 'N'
+            WHERE I.DELYN = 'N'
+            GROUP BY
+                  i.STCKTEA  /* 주식티커 */
+                , i.STCKNM   /* 주식명  */
+                , N.NTNNM
+        )
+        WHERE RN <![CDATA[ <= ]]>  10
+        ORDER BY country
+    </select>
+
+    <!--
+        쿼리명: getBankPie
+        설명: 은행별 투자 금액 비율을 조회합니다.
+
+        은행별 투자 금액 비율을 조회합니다.
+        은행명과 해당 은행을 통한 총 투자 금액을 반환합니다.
+    -->
+    <select id="getBankPie" resultType="map">
+        SELECT /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getBankPie - 대시보드 은행별 투자 금액 비율 */
+            B.BNNM AS name,
+            SUM(TO_NUMBER(REGEXP_REPLACE(S.DLNGAMT,'[^0-9\.-]',''),'9999999990D999999','NLS_NUMERIC_CHARACTERS=.,')) AS value
+        FROM STCKDLNGDSCTN S
+        JOIN BNINFR B ON S.BNCD=B.BNCD
+        WHERE S.DELYN='N'
+        GROUP BY B.BNNM
+    </select>
+
+    <!--
+        쿼리명: getNationPie
+        설명: 국가별 투자 금액 비율을 조회합니다.
+
+        국가별 투자 금액 비율을 조회합니다.
+        국가명과 해당 국가 주식에 대한 총 투자 금액을 반환합니다.
+    -->
+    <select id="getNationPie" resultType="map">
+        SELECT /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getNationPie - 대시보드 국가별 투자 금액 비율 */
+            N.NTNNM AS name,
+            SUM(TO_NUMBER(REGEXP_REPLACE(S.DLNGAMT,'[^0-9\.-]',''),'9999999990D999999','NLS_NUMERIC_CHARACTERS=.,')) AS value
+        FROM STCKDLNGDSCTN S
+        JOIN STCKINFO I ON S.STCKTEA=I.STCKTEA
+        JOIN NTNINFO N ON I.NTNCD=N.NTNCD
+        WHERE S.DELYN='N'
+        GROUP BY N.NTNNM
+    </select>
+
+    <!--
+        쿼리명: getTransactions
+        설명: 최근 거래 내역을 조회합니다.
+
+        최근 거래 내역을 조회합니다.
+        거래 번호, 거래 일자, 은행명, 주식명, 거래 금액, 매수/매도 여부, 거래 수량을 반환합니다.
+    -->
+    <select id="getTransactions" resultType="map">
+        SELECT /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getTransactions - 대시보드 최근 거래 내역 */
+            S.STCKDLNGDSCTN_NO,
+            S.DLNGYMD,
+            B.BNNM,
+            I.STCKNM,
+            S.DLNGAMT,
+            S.BYNGYN,
+            S.STCKCNT
+        FROM STCKDLNGDSCTN S
+        JOIN BNINFR B ON S.BNCD=B.BNCD
+        JOIN STCKINFO I ON S.STCKTEA=I.STCKTEA
+        WHERE S.DELYN='N'
+        ORDER BY S.DLNGYMD DESC
+    </select>
+
+
+    <!--
+        쿼리명: getRecommendedStocks
+        설명: 보유 주식의 배당 예측 정보를 조회합니다.
+
+        보유 주식의 주식 티커, 주식명, 예측 배당금을 반환합니다.
+    -->
+    <select id="getRecommendedStocks" resultType="map">
+        SELECT /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getRecommendedStocks - 대시보드 배당 예측 SQL (단순 이동평균) */
+            S.STCKTEA,
+            MAX(b.STCKNM) AS STCKNM,
+            AVG(TO_NUMBER(REGEXP_REPLACE(DVDND,'[^0-9\.-]',''), '9999999990D999999','NLS_NUMERIC_CHARACTERS=.,')) AS PREDICTED_DIVIDEND
+        FROM ALCTNDLNGDSCTN S
+        LEFT JOIN STCKINFO B
+            ON S.STCKTEA = B.STCKTEA
+        LEFT JOIN STOCK_BALANCE A
+            ON B.STCKINFO_NO = A.STCKINFO_NO
+        WHERE S.DELYN='N'
+            AND NVL(A.QTY, 0)  <![CDATA[ >= ]]> 1
+        GROUP BY S.STCKTEA
+    </select>
+
+
+    <!--
+        쿼리명: getPredictedDividend
+        설명: 추천 투자 주식 SQL (간단 예시) - 보유 주식의 배당 예측 정보를 조회합니다.
+
+        보유 주식의 주식 티커, 주식명, 예측 배당금을 반환합니다.
+    -->
+    <select id="getPredictedDividend" resultType="map">
+        SELECT /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getPredictedDividend - 대시보드 추천 투자 주식 SQL (간단 예시) */
+            S.STCKTEA,
+            MAX(B.STCKNM) AS STCKNM,
+            SUM(TO_NUMBER(REGEXP_REPLACE(A.DLNGAMT,'[^0-9\.-]',''), '9999999990D999999','NLS_NUMERIC_CHARACTERS=.,')) AS totalinvest,
+            SUM(TO_NUMBER(REGEXP_REPLACE(A.DVDND,'[^0-9\.-]',''), '9999999990D999999','NLS_NUMERIC_CHARACTERS=.,')) AS totaldividend
+        FROM STCKDLNGDSCTN S
+
+        <![CDATA[
+        LEFT JOIN ALCTNDLNGDSCTN A
+            ON S.STCKTEA = A.STCKTEA
+        LEFT JOIN STCKINFO B
+            ON S.STCKTEA = B.STCKTEA
+            AND B.DELYN = 'N'
+        LEFT JOIN STOCK_BALANCE A2
+            ON B.STCKINFO_NO = A2.STCKINFO_NO
+        WHERE S.DELYN='N' AND NVL(A2.QTY, 0) >= 1
+        GROUP BY S.STCKTEA
+        ORDER BY (SUM(TO_NUMBER(REGEXP_REPLACE(A.DVDND,'[^0-9\.-]',''),'9999999990D999999','NLS_NUMERIC_CHARACTERS=.,'))
+                / SUM(TO_NUMBER(REGEXP_REPLACE(A.DLNGAMT,'[^0-9\.-]',''),'9999999990D999999','NLS_NUMERIC_CHARACTERS=.,'))) DESC
+        FETCH FIRST 10 ROWS ONLY
+        ]]>
+
+
+    </select>
+
+    <!--
+        쿼리명: getMonthlyDividendTrend
+        설명: 최근 12개월 추이 정보를 조회합니다.
+
+        최근 12개월 추이를 반환합니다.
+    -->
+    <select id="getMonthlyDividendTrend" resultType="map">
+        SELECT /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getMonthlyDividendTrend - 대시보드 월별 배당금 추이*/
+            C.NTNNM AS COUNTRY,
+            SUBSTR(REPLACE(A.DLNGYMD, '-', ''), 1, 6) AS MONTH,
+            SUM(TO_NUMBER(NVL(REPLACE(A.DLNGAMT, ',', ''), '0'))) AS TOTAL
+        FROM ALCTNDLNGDSCTN A
+        JOIN STCKINFO B
+            ON A.STCKTEA = B.STCKTEA
+        JOIN NTNINFO C
+            ON B.NTNCD = C.NTNCD
+        WHERE A.DELYN = 'N'
+          AND A.DLNGYMD >= TO_CHAR(ADD_MONTHS(SYSDATE, -12), 'YYYYMMDD')
+        GROUP BY C.NTNNM, SUBSTR(REPLACE(A.DLNGYMD, '-', ''), 1, 6)
+        ORDER BY C.NTNNM, MONTH ASC
+    </select>
+
+</mapper>

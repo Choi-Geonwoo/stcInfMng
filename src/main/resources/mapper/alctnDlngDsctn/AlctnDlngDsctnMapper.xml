@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper">
+
+    <!-- findAll: 모든 배당거래내역을 조회합니다. -->
+    <select id="findAll" resultType="map">
+        SELECT  /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper.findAll - 배당거래내역 */
+              A.ALCTNDLNGDSCTN_NO       /* 배당거래내역 번호 (순번) */
+            , SUBSTR(A.DLNGYMD, 1, 7) AS DLNG_YM   /* 거래 년월 */
+            , C.STCKNM                  /* 주식명 */
+            , A.DVDND                   /* 배당금 */
+            , A.DLNGAMT                  /* 거래금액 */
+            , B.NTNNM                   /*국가명*/
+            , A.BNCD
+        FROM ALCTNDLNGDSCTN A /* 배당거래내역 테이블 */
+        INNER JOIN STCKINFO C /* 주식정보 테이블 */
+            ON A.STCKTEA = C.STCKTEA /* 주식티커로 조인 */
+        LEFT OUTER JOIN
+        (
+            SELECT /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper  - 주식정보 */
+                 B.NTNNM
+                ,A.STCKTEA
+                ,A.STCKNM
+                ,A.NTNCD
+            FROM STCKINFO A
+            LEFT OUTER JOIN NTNINFO B
+            ON (A.NTNCD = B.NTNCD)
+        ) B
+        ON A.STCKTEA = B.STCKTEA
+        WHERE 1=1 /* 항상 참인 조건으로 시작 */
+        <if test='stckTea != null and stckTea != ""'> /* 주식티커가 존재하면 */
+            AND A.STCKTEA = #{stckTea}               /* 해당 주식티커로 필터링 */
+        </if>
+        <if test='bnCd != null and bnCd != ""'>      /* 은행코드가 존재하면 */
+            AND A.BNCD = #{bnCd}                     /* 해당 은행코드로 필터링 */
+        </if>
+        <if test='dlngYmd != null and dlngYmd != ""'> /* 거래년월일이 존재하면 */
+            AND SUBSTR(A.DLNGYMD, 1, 4) = #{dlngYmd}  /* 거래년월로 필터링 */
+        </if>
+        <if test='month != null and month != ""'> /* 거래년월일이 존재하면 */
+            AND SUBSTR(A.DLNGYMD, 6, 2) = LPAD(#{month}, 2, '0')  /* 거래년월로 필터링 */
+        </if>
+        <if test='ntnCd != null and ntnCd != ""'> /* 국가코드 존재하면 */
+            AND B.NTNCD = #{ntnCd}                /* 국가코드 필터링 */
+        </if>
+        ORDER BY /* 정렬 기준 */
+            SUBSTR(A.DLNGYMD, 1, 7), /* 거래년월로 1차 정렬 */
+            C.STCKNM /* 주식명으로 2차 정렬 */
+    </select>
+
+
+    <!-- findAll: 월간 배당거래내역을 조회합니다. -->
+    <select id="getMonthAll" resultType="map">
+        SELECT /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper.getMonthAll - 배당거래내역 */
+            DECODE(GROUPING(TO_CHAR(TO_DATE(DLNGYMD), 'YYYY')), 1, '합계', TO_CHAR(TO_DATE(DLNGYMD), 'YYYY')) || ' ('||B.NTNNM || ')'AS DLNGYMD,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '01' , DLNGAMT, '0') ) AS JANUARY,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '02' , DLNGAMT, '0') ) AS FEBRUARY,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '03' , DLNGAMT, '0') ) AS MARCH,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '04' , DLNGAMT, '0') ) AS APRIL,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '05' , DLNGAMT, '0') ) AS MAY,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '06' , DLNGAMT, '0') ) AS JUNE,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '07' , DLNGAMT, '0') ) AS JULY,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '08' , DLNGAMT, '0') ) AS AUGUST,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '09' , DLNGAMT, '0') ) AS SEPTEMBER,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '10' , DLNGAMT, '0') ) AS OCTOBER,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '11' , DLNGAMT, '0') ) AS NOVEMBER,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '12' , DLNGAMT, '0') ) AS DECEMBER,
+            SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '01' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '02' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '03' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '04' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '05' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '06' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '07' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '08' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '09' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '10' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '11' , DLNGAMT, '0') )
+            + SUM(DECODE(TO_CHAR(TO_DATE(DLNGYMD), 'MM'), '12' , DLNGAMT, '0') )
+            AS ALL_SUM
+        FROM ALCTNDLNGDSCTN A /* 배당거래내역 테이블 */
+        INNER JOIN STCKINFO C /* 주식정보 테이블 */
+            ON A.STCKTEA = C.STCKTEA /* 주식티커로 조인 */
+        LEFT OUTER JOIN
+        (
+            SELECT /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper  - 주식정보 */
+                 B.NTNNM
+                ,A.STCKTEA
+                ,A.STCKNM
+                ,A.NTNCD
+            FROM STCKINFO A
+            LEFT OUTER JOIN NTNINFO B
+        ON (A.NTNCD = B.NTNCD)
+        ) B
+        ON A.STCKTEA = B.STCKTEA
+        WHERE 1=1 /* 항상 참인 조건으로 시작 */
+        <if test='stckTea != null and stckTea != ""'> /* 주식티커가 존재하면 */
+            AND A.STCKTEA = #{stckTea}               /* 해당 주식티커로 필터링 */
+        </if>
+        <if test='bnCd != null and bnCd != ""'>      /* 은행코드가 존재하면 */
+            AND A.BNCD = #{bnCd}                     /* 해당 은행코드로 필터링 */
+        </if>
+        <if test='dlngYmd != null and dlngYmd != ""'> /* 거래년월일이 존재하면 */
+            AND SUBSTR(A.DLNGYMD, 1, 4) = #{dlngYmd}  /* 거래년월로 필터링 */
+        </if>
+        <if test='month != null and month != ""'> /* 거래년월일이 존재하면 */
+            AND SUBSTR(A.DLNGYMD, 6, 2) = LPAD(#{month}, 2, '0')  /* 거래년월로 필터링 */
+        </if>
+        <if test='ntnCd != null and ntnCd != ""'> /* 국가코드 존재하면 */
+            AND B.NTNCD = #{ntnCd}                /* 국가코드 필터링 */
+        </if>
+        GROUP BY B.NTNNM, ROLLUP(TO_CHAR(TO_DATE(DLNGYMD), 'YYYY'))
+    </select>
+
+
+
+    <!-- getWeeklyAll: 월간 배당거래내역을 조회합니다. -->
+    <select id="getWeeklyAll" resultType="map">
+        SELECT /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper.getWeeklyAll - 배당거래내역 */
+             B.NTNNM    /*국가명*/
+            ,B.STCKNM   /*주식명*/
+            ,A.DLNGYMD  /*배당일자*/
+            ,A.DVDND    /*배당금*/
+            ,A.DLNGAMT  /*거래금액*/
+        FROM ALCTNDLNGDSCTN A /* 배당거래내역 테이블 */
+        INNER JOIN STCKINFO C /* 주식정보 테이블 */
+            ON A.STCKTEA = C.STCKTEA /* 주식티커로 조인 */
+        LEFT OUTER JOIN
+        (
+            SELECT /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper  - 주식정보 */
+                 B.NTNNM
+                ,A.STCKTEA
+                ,A.STCKNM
+                ,A.NTNCD
+            FROM STCKINFO A
+            LEFT OUTER JOIN NTNINFO B
+                ON (A.NTNCD = B.NTNCD)
+        ) B
+        ON A.STCKTEA = B.STCKTEA
+        WHERE A.DELYN = 'N'
+        <if test='stckTea != null and stckTea != ""'> /* 주식티커가 존재하면 */
+            AND A.STCKTEA = #{stckTea}               /* 해당 주식티커로 필터링 */
+        </if>
+        <if test='bnCd != null and bnCd != ""'>      /* 은행코드가 존재하면 */
+            AND A.BNCD = #{bnCd}                     /* 해당 은행코드로 필터링 */
+        </if>
+        <if test='dlngYmd != null and dlngYmd != ""'> /* 거래년월일이 존재하면 */
+            AND SUBSTR(A.DLNGYMD, 1, 4) = #{dlngYmd}  /* 거래년월로 필터링 */
+        </if>
+        <if test='month != null and month != ""'> /* 거래년월일이 존재하면 */
+            AND SUBSTR(A.DLNGYMD, 6, 2) = LPAD(#{month}, 2, '0')  /* 거래년월로 필터링 */
+        </if>
+        <if test='ntnCd != null and ntnCd != ""'> /* 국가코드 존재하면 */
+            AND B.NTNCD = #{ntnCd}                /* 국가코드 필터링 */
+        </if>
+        ORDER BY A.DLNGYMD DESC , B.STCKNM DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+
+    <select id="getWeeklyCountAll" resultType="int" parameterType="map">
+        SELECT /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper.getWeeklyCountAll - 배당거래내역 */
+            COUNT(1)
+        FROM ALCTNDLNGDSCTN A /* 배당거래내역 테이블 */
+        INNER JOIN STCKINFO C /* 주식정보 테이블 */
+            ON A.STCKTEA = C.STCKTEA /* 주식티커로 조인 */
+        LEFT OUTER JOIN
+        (
+            SELECT /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper  - 주식정보 */
+                B.NTNNM
+                ,A.STCKTEA
+                ,A.STCKNM
+                ,A.NTNCD
+            FROM STCKINFO A
+            LEFT OUTER JOIN NTNINFO B
+            ON (A.NTNCD = B.NTNCD)
+        ) B
+        ON A.STCKTEA = B.STCKTEA
+        WHERE A.DELYN = 'N'
+        <if test='stckTea != null and stckTea != ""'> /* 주식티커가 존재하면 */
+            AND A.STCKTEA = #{stckTea}               /* 해당 주식티커로 필터링 */
+        </if>
+        <if test='bnCd != null and bnCd != ""'>      /* 은행코드가 존재하면 */
+            AND A.BNCD = #{bnCd}                     /* 해당 은행코드로 필터링 */
+        </if>
+        <if test='dlngYmd != null and dlngYmd != ""'> /* 거래년월일이 존재하면 */
+            AND SUBSTR(A.DLNGYMD, 1, 4) = #{dlngYmd}  /* 거래년월로 필터링 */
+        </if>
+        <if test='month != null and month != ""'> /* 거래년월일이 존재하면 */
+            AND SUBSTR(A.DLNGYMD, 6, 2) = LPAD(#{month}, 2, '0')  /* 거래년월로 필터링 */
+        </if>
+        <if test='ntnCd != null and ntnCd != ""'> /* 국가코드 존재하면 */
+            AND B.NTNCD = #{ntnCd}                /* 국가코드 필터링 */
+        </if>
+    </select>
+
+
+    <!-- 특정 배당거래내역 조회 -->
+    <select id="findById" parameterType="String" resultType="map">
+        SELECT  /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper - 배당거래내역 */
+                     A.ALCTNDLNGDSCTN_NO /*순번*/
+                    ,B.BNCD              /*은행티커*/
+                    ,B.BNNM              /*은행명*/
+                    ,A.STCKTEA           /*주식티커*/
+                    ,C.STCKNM            /*주식명*/
+                    ,D.NTNNM             /*국가명*/
+                    ,A.DLNGYMD           /*거래일자*/
+                    ,A.DLNGAMT           /*거래금액*/
+                    ,A.DVDND             /*배당금*/
+                    ,A.DELYN             /*삭제여부*/
+                    ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+                    ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+                    ,Z.FILENM            /*파일명*/
+                    ,Z.FILEINFO          /*파일정보*/
+        FROM ALCTNDLNGDSCTN A
+        INNER JOIN bnInfr b
+            ON A.BNCD = B.BNCD
+            AND B.DELYN ='N'
+        INNER JOIN STCKINFO C
+            ON A.STCKTEA = C.STCKTEA
+        INNER JOIN NTNINFO D
+            ON C.NTNCD = D.NTNCD
+        LEFT OUTER JOIN FILEINFO Z
+            ON A.ALCTNDLNGDSCTN_NO = Z.ALCTNDLNGDSCTN_NO
+            AND Z.DELYN = 'N'
+        WHERE A.ALCTNDLNGDSCTN_NO = #{alctndlngdsctn_no}
+        ORDER BY A.DLNGAMT DESC
+    </select>
+
+    <!-- 배당거래내역 생성 -->
+    <insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper - 배당거래내역 */
+        INSERT INTO ALCTNDLNGDSCTN
+        (
+            ALCTNDLNGDSCTN_NO,
+            BNCD,     /* 은행코드 */
+            STCKTEA,  /* 주식티커 */
+            DLNGYMD,  /* 거래년월일 */
+            DLNGAMT,  /* 거래금액 */
+            DVDND,    /* 배당금 */
+            FILENM,   /* 파일명 */
+            DELYN,    /* 삭제여부 */
+            REGDAY,    /* 등록일자 */
+            MDFCNDAY   /* 수정일자 */
+        )
+        VALUES
+        (
+          #{alctnDlngDsctn_no} /* 배당거래내역 번호 (순번) */
+        , #{bnCd}
+        , #{stckTea}
+        , #{dlngYmd}
+        , #{dlngAmt}
+        , #{dvdnd}
+        , #{fileNm}
+        , 'N'
+        , SYSDATE
+        , SYSDATE
+        )
+    </insert>
+
+    <!-- 배당거래내역 정보 업데이트 -->
+    <update id="update" parameterType="map">
+        UPDATE /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper.update - 배당거래내역 */
+            ALCTNDLNGDSCTN
+        SET /* 업데이트할 컬럼 설정 */
+             BNCD    = #{bnCd}    /*  은행코드 */
+            ,STCKTEA = #{stckTea}  /* 주식티커 */
+            ,DLNGYMD = #{dlngYmd}  /* 거래년월일 */
+            ,DLNGAMT = #{dlngAmt}  /* 거래금액 */
+            ,DVDND   = #{dvdnd}    /* 배당금 */
+            ,MDFCNDAY = SYSDATE    /* 수정일자 */
+            <if test='fileNm != null and fileNm != ""'> /* 파일명이 존재하면 */
+             ,fileNm = #{fileNm} /* 파일명 업데이트 */
+            </if>
+        WHERE ALCTNDLNGDSCTN_NO = #{alctnDlngDsctn_no} /* 배당거래내역 번호로 필터링 */
+    </update>
+
+    <!-- 배당거래내역 삭제 -->
+    <update id="delete" parameterType="String">
+        UPDATE ALCTNDLNGDSCTN/* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper - 배당거래내역 */
+            SET DVDND   = 'Y'
+               ,MDFCNDAY = SYSDATE
+        WHERE ALCTNDLNGDSCTN_NO = #{alctnDlngDsctn_no} /* 배당거래내역 번호로 필터링 */
+    </update>
+
+    <!-- 특정 배당거래내역 조회 -->
+    <select id="alctnDlngDsctnSeq"  resultType="String">
+        SELECT  /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper - 배당거래내역 */
+            TO_CHAR(SYSTIMESTAMP, 'SSFF3') || LPAD(alctnDlngDsctn_seq.NEXTVAL, 5, 0)
+        FROM dual
+    </select>
+
+</mapper>

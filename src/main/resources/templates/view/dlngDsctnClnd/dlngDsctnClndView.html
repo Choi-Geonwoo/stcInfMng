@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>거래내역달력</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/com/com.css}">
+
+    <script type="text/javascript" th:src="@{/JS/dlngDsctnClnd/dlngDsctnClnd.js}"></script>
+
+    <!-- FullCalendar CSS (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/main.min.css" rel="stylesheet" />
+
+    <!-- FullCalendar 글로벌 번들 (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js"></script>
+    <!-- (선택) 모든 로케일을 로드하려면 아래 스크립트 추가 후 locale: 'ko' 사용 -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/locales-all.global.min.js"></script>
+
+
+    <style>
+
+    </style>
+</head>
+<body>
+
+<!-- parent.html -->
+<div th:replace="./view/fragments/header :: headerFragment"></div>
+
+<section class="card register">
+    <h2>거래내역달력 - 등록 영역</h2>
+</section>
+
+
+<section class="card search">
+    <h2>검색 영역</h2>
+    <input type="text" placeholder="검색어를 입력하세요">
+    <button type="button" id="searchBtn" class="btn btn-search">검색하기</button>
+</section>
+
+<!--<section class="card list-grid">
+    <div class="item" onclick="openModal()">항목 1</div>
+    <div class="item" onclick="openModal()">항목 2</div>
+    <div class="item" onclick="openModal()">항목 3</div>
+    <div class="item" onclick="openModal()">항목 4</div>
+    <div class="item" onclick="openModal()">항목 5</div>
+    <div class="item" onclick="openModal()">항목 6</div>
+</section>-->
+
+
+<section class="card">
+    <h2>거래내역 달력 형식</h2>
+    <div id="calendar"></div>
+</section>
+
+<!--
+<div class="pagination">
+    <button>이전</button>
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button>다음</button>
+</div>-->
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="modal">
+
+    <div id="app-modal-root"></div>
+
+    <template id="app-modal-template">
+        <div class="app-modal-backdrop">
+            <div class="app-modal">
+                <h3 class="modal-title"></h3>
+                <p class="modal-message"></p>
+                <div class="modal-actions">
+                    <button class="btn cancel">취소</button>
+                    <button class="btn confirm">확인</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+</div>
+</body>
+</html>

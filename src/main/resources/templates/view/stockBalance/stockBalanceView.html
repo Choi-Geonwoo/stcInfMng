@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주식수량관리</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/com/com.css}">
+    <script type="module" th:src="@{/JS/stockBalance/stockBalance.js}" defer></script>
+    <script type="text/javascript" th:src="@{/JS/com/comUitl.js}" defer></script>
+    <!--<script type="text/javascript" th:src="@{/JS/util/fetchUtil.js}" defer></script>-->
+
+    <link rel="stylesheet" th:href="@{/CSS/com/modal.css}">
+    <script type="text/javascript" th:src="@{/JS/com/todayUitl.js}" defer></script>
+    <!--<script type="module" th:src="@{/JS/com/modal.js}" defer></script>-->
+
+    <style>
+
+    </style>
+    <script th:inline="javascript">
+    </script>
+  </head>
+  <body>
+
+  <!-- parent.html -->
+  <div th:replace="./view/fragments/header :: headerFragment"></div>
+
+  <section class="card register">
+      <h2>주식 정보 - 등록 영역</h2>
+  </section>
+
+
+  <section class="card search">
+      <h2>검색 영역</h2>
+      <div class="form-grid">
+          <div class="form-group">
+              <label for="s_ntnCd">국가명</label>
+              <select id="s_ntnCd" name="s_ntnCd">
+              </select>
+          </div>
+
+          <div class="form-group">
+              <label for="s_stckTea">주식명</label>
+              <select id="s_stckTea" name="s_stckTea">
+              </select>
+          </div>
+
+          <div class="form-group">
+              <label for="s_alctn">배당주기</label>
+              <select class="input" id="s_alctn" name="s_alctn">
+                  <option value="">전체</option>
+                  <option value="월">월</option>
+                  <option value="08">08</option>
+                  <option value="01,04,07,10">01,04,07,10</option>
+                  <option value="02,05,08,11">02,05,08,11</option>
+                  <option value="03,06,09,12">03,06,09,12</option>
+                  <option value="04,07,10,12">04,07,10,12</option>
+              </select>
+          </div>
+      </div>
+
+      <div style="margin-top:16px; text-align:right;">
+          <button type="button" id="searchBtn" class="btn btn-search">검색하기</button>
+          <button type="button" id="excelBtn" class="btn btn-excel">엑셀 다운로드</button>
+      </div>
+  </section>
+
+
+
+  <section class="card">
+      <h2>데이터 테이블</h2>
+      <div class="table-wrapper">
+          <table id="bankTable">
+              <thead>
+              <tr>
+                  <th>ID</th>
+                  <th data-key="NTNNM">국가명</th>
+                  <th data-key="STCKNM">주식명</th>
+                  <th data-key="ALCTN">배당주기</th>
+                  <th data-key="QTY">수량</th>
+                  <th>삭제여부</th>
+                  <th>관리</th>
+              </tr>
+              </thead>
+              <tbody id="bankList"></tbody>
+          </table>
+      </div>
+  </section>
+  <div class="pagination" id="pagination"></div>
+
+  <div th:replace="./view/common/modal :: modal"></div>
+
+
+
+  <!-- 모달 -->
+  <div id="modalOverlay" class="modal-overlay">
+      <div class="modal-box">
+          <!-- 모달 헤더 -->
+          <header class="modal-header">
+              <h2>상세 보기</h2>
+              <!--<button type="button" class="modal-close-btn" onclick="closeModal()">✕</button>-->
+              <!-- 닫기 버튼 -->
+              <button type="button" class="modal-close-btn">✕</button>
+          </header>
+
+          <!-- 모달 본문 -->
+          <div class="modal-body table-wrapper">
+
+
+              <table class="modal-table">
+                  <thead>
+                  <tr>
+                      <th>
+                          <label >주식명</label>
+                      </th>
+                      <th>
+                          <label id="stcknm">주식명</label>
+                      </th>
+                      <th >
+                          <label >국가명</label>
+                      </th>
+                      <th colspan="2">
+                        <label id="ntnnm">국가명</label>
+                      </th>
+
+                  </tr>
+                  <tr>
+                      <th>
+                          <label >순번</label>
+                      </th>
+                      <th>
+                          <label >은행/증권사명</label>
+                      </th>
+                      <th>
+                          <label >거래일자</label>
+                      </th>
+                      <th>
+                          <label >배당금</label>
+                      </th>
+                      <th>
+                          <label >거래금액</label>
+                      </th>
+                  </tr>
+
+                  </thead>
+                  <tbody id="dllsList">
+                  </tbody>
+                  <tfoot>
+                  <tr>
+                      <td colspan="4">
+                          <label >배당금 합계 : </label>
+                      </td>
+                      <td >
+                          <label id="tot_sun">합계</label>
+                      </td>
+                  </tr>
+                  </tfoot>
+              </table>
+          </div>
+
+          <!-- 모달 푸터 -->
+          <footer class="modal-footer">
+              <!-- 취소 버튼 -->
+              <button type="button" class="btn btn-cancel">닫기</button>
+          </footer>
+      </div>
+  </div>
+
+
+  </body>
+  </html>
