@@ -1,6 +1,7 @@
 // /JS/pages/ntnInfo.js
-import { request } from '/JS/util/fetchUtil.js';
-import { populateTableCommon, initRowHandler, extractRowData } from '/JS/util/TableCommonUitl.js';
+/*import { Util.request } from '/JS/util/fetchUtil.js';
+import { Util.populateTableCommon, Util.initRowHandler, Util.extractRowData } from '/JS/util/TableCommonUitl.js';*/
+import * as Util from '/JS/util/index.js';
 
 const DOM_ID = {
     TABLE_BODY: 'bankList',
@@ -51,13 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadNtnList() {
     try {
-        const res = await request(API_URL.GET_ALL, 'GET');
+        const res = await Util.request(API_URL.GET_ALL, 'GET');
         if (!res || !res.data) return;
         renderTable(res.data , res.data.length);
         console.log(res);
     } catch (err) {
-        console.error(err);
-        alert(MESSAGES.LOAD_FAIL);
+        console.log(err);
+        await Util.AppAlert(MESSAGES.LOAD_FAIL);
     }
 }
 
@@ -69,18 +70,13 @@ async function handleCreate() {
 
     const data = { ntncd, ntnnm, useyn, delyn };
 
-    const fields = ["ntncd","ntnnm"];
-    for(const f of fields){
-        const val = document.getElementById(f).value;
-        if(!val && f !== "dvdnd") return alert("필수 입력값을 확인하세요.");
-    }
     try {
-        await request(API_URL.CREATE, 'POST', data);
-        alert(MESSAGES.CREATE_SUCCESS);
+        await Util.request(API_URL.CREATE, 'POST', data);
+        await Util.AppAlert(MESSAGES.CREATE_SUCCESS);
         loadNtnList();
     } catch (err) {
         console.error(err);
-        alert(MESSAGES.CREATE_FAIL + err);
+        await Util.AppAlert(MESSAGES.CREATE_FAIL + err);
     }
 }
 
@@ -89,9 +85,9 @@ async function handleSearch() {
     const ntnNm = document.querySelector('section.search input[name="ntnNm"]').value.trim();
 
     try {
-        const res = await request(`${API_URL.SEARCH}?ntnCd=${ntnCd}&ntnNm=${ntnNm}`, 'GET');
+        const res = await Util.request(`${API_URL.SEARCH}?ntnCd=${ntnCd}&ntnNm=${ntnNm}`, 'GET');
         if (!res || !res.data || res.data.length === 0) {
-            alert(MESSAGES.SEARCH_NO_RESULT);
+            await Util.AppAlert(MESSAGES.SEARCH_NO_RESULT);
             document.getElementById(DOM_ID.TABLE_BODY).innerHTML = '';
             return;
         }
@@ -99,7 +95,7 @@ async function handleSearch() {
         console.log(res);
     } catch (err) {
         console.error(err);
-        alert(MESSAGES.SEARCH_ERROR);
+        await Util.AppAlert(MESSAGES.SEARCH_ERROR);
     }
 }
 
@@ -108,7 +104,7 @@ async function handleSearch() {
 function renderTable(data, totalCount) {
     document.getElementById("countVal").innerHTML = "건수 : "+totalCount;
 
-    populateTableCommon(DOM_ID.TABLE_BODY, data, [
+    Util.populateTableCommon(DOM_ID.TABLE_BODY, data, [
         { key: 'NTNINFO_NO', type: 'label', nameTemplate: 'banks[{id}].NTNINFO_NO', readOnly: true },
         { key: 'NTNCD', type: 'text', nameTemplate: 'banks[{id}].NTNCD' },
         { key: 'NTNNM', type: 'text', nameTemplate: 'banks[{id}].NTNNM' },
@@ -127,27 +123,27 @@ function renderTable(data, totalCount) {
 // ------------------------ 테이블 이벤트 핸들러 ------------------------
 
 function initTableHandlers() {
-    initRowHandler(DOM_ID.TABLE_BODY, {
+    Util.initRowHandler(DOM_ID.TABLE_BODY, {
         onEdit: async (id, tr) => {
-            const data = extractRowData(tr);
-            console.log(data);
+            const data = Util.extractRowData(tr);
+//            console.log(data);
             try {
-                await request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
-                alert(MESSAGES.UPDATE_SUCCESS);
+                await Util.request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
+                await Util.AppAlert("수정 완료");
             } catch (err) {
-                console.error(err);
-                alert(MESSAGES.UPDATE_FAIL);
+                console.log(err);
+                await Util.AppAlert(MESSAGES.UPDATE_FAIL);
             }
         },
         onDelete: async (id, tr) => {
             if (!confirm(MESSAGES.DELETE_CONFIRM)) return;
             try {
-                await request(`${API_URL.DELETE_BASE}/${id}`, 'DELETE');
+                await Util.request(`${API_URL.DELETE_BASE}/${id}`, 'DELETE');
                 tr.remove();
-                alert(MESSAGES.DELETE_SUCCESS);
+                await Util.AppAlert(MESSAGES.DELETE_SUCCESS);
             } catch (err) {
                 console.error(err);
-                alert(MESSAGES.DELETE_FAIL);
+                await Util.AppAlert(MESSAGES.DELETE_FAIL);
             }
         }
     });

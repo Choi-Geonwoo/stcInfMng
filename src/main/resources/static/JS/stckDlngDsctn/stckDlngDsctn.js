@@ -216,7 +216,7 @@ async function loadBankList() {
     }));
 
     const banks = await loadListCommon_n(
-        '/bninfr/getAll',
+        '/common/getSelectAll/BNINFR',
         ['bnCd', 's_bnCd'],
         'BNCD',
         'BNNM'
@@ -227,8 +227,9 @@ async function loadBankList() {
         label: b.BNNM
     }));
 //    console.log("BANK_OPTIONS  ", BANK_OPTIONS);
-    loadListCommon("/bninfr/getAll", ["bnCd", "s_bnCd"], "BNCD", "BNNM");
-    loadListCommon("/stckInfo/getSelectAll", ["stckTea", "s_stckTea"], "STCKTEA", "STCKNM");
+    loadListCommon("/common/getSelectAll/BNINFR", ["bnCd", "s_bnCd"], "BNCD", "BNNM");
+//    loadListCommon("/stckInfo/getSelectAll", ["stckTea", "s_stckTea"], "STCKTEA", "STCKNM");
+    loadListCommon("/common/getSelectAll/STCKINFO", ["stckTea", "s_stckTea"], "STCKTEA", "STCKNM");
 }
 
 /* -------------------------------------------------------------------------- */

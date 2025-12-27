@@ -150,10 +150,10 @@
             , A.DLNGYMD                /* 거래 년월 */
             , C.STCKNM                  /* 주식명 */
             , A.DVDND                   /* 배당금 */
-            , A.DLNGAMT                 /* 거래금액 */
+            , FN_FORMAT_AMOUNT(A.DLNGAMT, B.NTNCD ) AS DLNGAMT                 /* 거래금액 */
             , B.NTNNM                   /* 국가명*/
             , C.BNNM
-            , SUM( A.DLNGAMT) OVER() AS TOT_SUN
+            , FN_FORMAT_AMOUNT(SUM( A.DLNGAMT) OVER(), B.NTNCD ) AS TOT_SUN
         FROM ALCTNDLNGDSCTN A /* 배당거래내역 테이블 */
         INNER JOIN STCKINFO C /* 주식정보 테이블 */
             ON A.STCKTEA = C.STCKTEA /* 주식티커로 조인 */
@@ -161,6 +161,7 @@
         (
             SELECT /* SQL : COM.EXAMPLE.DEMO.ALCTNDLNGDSCTN.MAPPER.ALCTNDLNGDSCTNMAPPER  - 주식정보 */
                  B.NTNNM
+                ,B.NTNCD
                 ,A.STCKTEA
                 ,A.STCKNM
             FROM STCKINFO A           /*주식정보*/

@@ -179,7 +179,7 @@
         SELECT /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getPredictedDividend - 대시보드 추천 투자 주식 SQL (간단 예시) */
             S.STCKTEA,
             MAX(B.STCKNM) AS STCKNM,
-            SUM(TO_NUMBER(REGEXP_REPLACE(A.DLNGAMT,'[^0-9\.-]',''), '9999999990D999999','NLS_NUMERIC_CHARACTERS=.,')) AS totalinvest,
+            FN_FORMAT_AMOUNT(SUM( A.DLNGAMT), B.NTNCD ) AS totalinvest,
             SUM(TO_NUMBER(REGEXP_REPLACE(A.DVDND,'[^0-9\.-]',''), '9999999990D999999','NLS_NUMERIC_CHARACTERS=.,')) AS totaldividend
         FROM STCKDLNGDSCTN S
 

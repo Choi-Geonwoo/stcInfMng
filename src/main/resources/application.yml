@@ -36,6 +36,7 @@ mybatis:
     default-fetch-size: 500
   mapper-locations: classpath:/mapper/**/*.xml
   type-aliases-package: com.bank.transaction.mapper.*
+  type-handlers-package: com.example.demo.util.config
 
 decorator:
   datasource:
@@ -46,3 +47,12 @@ logging:
   level:
     org.apache.ibatis: WARN
     org.mybatis: WARN
+
+################################
+# 공통 대상 테이블 설정
+################################
+app:
+  allowed-tables:
+    - NTNINFO
+    - STCKINFO
+    - BNINFR

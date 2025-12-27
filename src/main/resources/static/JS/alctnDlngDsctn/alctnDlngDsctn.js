@@ -116,9 +116,8 @@ async function loadAlctnDlngDsctn() {
  * 국가, 주식, 은행 목록을 비동기적으로 가져와 해당 select 요소에 채웁니다.
  */
 async function loadSelectOptions() {
-    loadListCommon("/ntnInfo/getAll", ["s_ntnCd"], "NTNCD", "NTNNM");
-//    loadListCommon("/stckInfo/getSelectAll", ["stckTea", "s_stckTea"], "STCKTEA", "STCKNM");
-//    loadListCommon("/bninfr/getAll", ["bnCd", "s_bnCd"], "BNCD", "BNNM");
+        //loadListCommon("/ntnInfo/getAll", ["s_ntnCd"], "NTNCD", "NTNNM");
+        loadListCommon("/common/getSelectAll/NTNINFO", ["s_ntnCd"], "NTNCD", "NTNNM");
 
         // 주식 목록 직접 로드
         const stockRes = await request("/stckDlngDsctn/getSelectAll", "GET");
@@ -129,6 +128,7 @@ async function loadSelectOptions() {
 
         // 🔥 은행 목록 직접 로드
         const bankRes = await request("/bninfr/getAll", "GET");
+
         bankList = bankRes?.data || [];
         populateSelectOptions("bnCd", bankList, "BNCD", "BNNM");
         populateSelectOptions("s_bnCd", bankList, "BNCD", "BNNM");
