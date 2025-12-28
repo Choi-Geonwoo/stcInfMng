@@ -52,10 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
 
 });
-// 셀렉트 박스 옵션 로드
 
+// 셀렉트 박스 옵션 로드
 function loadSelectOptions() {
-    Util.loadListCommon("/ntnInfo/getAll", ["s_ntnCd"], "NTNCD", "NTNNM");
+    Util.loadListCommon("/common/getSelectAll/NTNINFO", ["s_ntnCd"], "NTNCD", "NTNNM");
     Util.loadListCommon("/stckInfo/getSelectAll", ["s_stckTea"], "STCKTEA", "STCKNM");
 }
 

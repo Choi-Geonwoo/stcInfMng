@@ -61,4 +61,9 @@
         WHERE ALCTNDLNGDSCTN_NO =#{alctnDlngDsctn_no}
     </delete>
 
+    <select id="existsByOwner" parameterType="string" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM FILE_INFO
+        WHERE alctnDlngDsctn_no = #{id}
+    </select>
 </mapper>

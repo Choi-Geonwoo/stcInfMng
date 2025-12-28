@@ -1,9 +1,11 @@
-import { request } from '/JS/util/fetchUtil.js';
-import { loadPageDataCommon } from '/JS/util/loadPageDataCommon.js';
-import { populateTableCommon, initRowHandler, extractRowData } from '/JS/util/TableCommonUitl.js';
-import { loadListCommon, loadListCommon_n } from '/JS/util/loadListUitl.js';
-import { renderPagination } from '/JS/util/pagination.js';
-import { downloadExcelFromTable } from '/JS/util/excelUtil.js';
+/*import { Util.request } from '/JS/util/fetchUtil.js';
+import { Util.loadPageDataCommon } from '/JS/util/Util.loadPageDataCommon.js';
+import { Util.populateTableCommon, Util.initRowHandler, Util.extractRowData } from '/JS/util/TableCommonUitl.js';
+import { Util.loadListCommon, Util.loadListCommon_n } from '/JS/util/loadListUitl.js';
+import { Util.renderPagination } from '/JS/util/pagination.js';
+import { Util.downloadExcelFromTable } from '/JS/util/excelUtil.js';*/
+
+import * as Util from '/JS/util/index.js';
 
 const DOM_ID = {
     TABLE_BODY: 'bankList',
@@ -109,8 +111,8 @@ async function onSubmit() {
     };
 
     try {
-        await request(API_URL.CREATE, "POST", data);
-        alert("등록 성공!");
+        await Util.request(API_URL.CREATE, "POST", data);
+        await Util.AppAlert("등록 성공!");
 
         // 등록 후 전체 조회 모드로 초기화
         SEARCH_STATE.mode = "all";
@@ -119,7 +121,7 @@ async function onSubmit() {
         loadStckDlngDsctn();
     } catch (err) {
         console.error(err);
-        alert("등록 실패: " + err);
+        await Util.AppAlert("등록 실패: " + err);
     }
 }
 
@@ -148,7 +150,7 @@ async function onSearch() {
 function renderTable(data, totalCount) {
     document.getElementById("countVal").innerHTML = "건수 : "+totalCount;
 //    console.log(totalCount);
-    populateTableCommon(DOM_ID.TABLE_BODY, data, [
+    Util.populateTableCommon(DOM_ID.TABLE_BODY, data, [
 
         { key: 'STCKDLNGDSCTN_NO', type: 'label', nameTemplate: 'banks[{id}].STCKDLNGDSCTN_NO', readOnly: true },
         { key: 'DLNGYMD', type: 'date', nameTemplate: 'banks[{id}].DLNGYMD', dataField: 'dlngymd' },
@@ -172,28 +174,28 @@ function renderTable(data, totalCount) {
 /*                              수정/삭제 이벤트 핸들러                          */
 /* -------------------------------------------------------------------------- */
 function initTableHandlers() {
-    initRowHandler(DOM_ID.TABLE_BODY, {
+    Util.initRowHandler(DOM_ID.TABLE_BODY, {
         onEdit: async (id, tr) => {
-            const data = extractRowData(tr);
+            const data = Util.extractRowData(tr);
 //            console.log(data);
             try {
-                await request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
-                alert("수정 완료");
+                await Util.request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
+                Util.AppAlert("수정 완료");
             } catch (err) {
                 console.error(err);
-                alert("수정 실패");
+                Util.AppAlert("수정 실패");
             }
         },
         onDelete: async (id, tr) => {
             if (!confirm("정말 삭제하시겠습니까?")) return;
 
             try {
-                await request(`${API_URL.DELETE_BASE}/${id}`, 'POST');
+                await Util.request(`${API_URL.DELETE_BASE}/${id}`, 'POST');
                 tr.remove();
-                alert("삭제 완료");
+                Util.AppAlert("삭제 완료");
             } catch (err) {
                 console.error(err);
-                alert("삭제 실패");
+                Util.AppAlert("삭제 실패");
             }
         }
     });
@@ -204,7 +206,7 @@ function initTableHandlers() {
 /* -------------------------------------------------------------------------- */
 // 은행목록
 async function loadBankList() {
-    const stckmn = await loadListCommon_n(
+    const stckmn = await Util.loadListCommon_n(
         '/stckInfo/getSelectAll',
         ['stckTea', 's_stckTea'],
         'STCKTEA',
@@ -215,7 +217,7 @@ async function loadBankList() {
         label: b.STCKNM
     }));
 
-    const banks = await loadListCommon_n(
+    const banks = await Util.loadListCommon_n(
         '/common/getSelectAll/BNINFR',
         ['bnCd', 's_bnCd'],
         'BNCD',
@@ -227,23 +229,23 @@ async function loadBankList() {
         label: b.BNNM
     }));
 //    console.log("BANK_OPTIONS  ", BANK_OPTIONS);
-    loadListCommon("/common/getSelectAll/BNINFR", ["bnCd", "s_bnCd"], "BNCD", "BNNM");
-//    loadListCommon("/stckInfo/getSelectAll", ["stckTea", "s_stckTea"], "STCKTEA", "STCKNM");
-    loadListCommon("/common/getSelectAll/STCKINFO", ["stckTea", "s_stckTea"], "STCKTEA", "STCKNM");
+    Util.loadListCommon("/common/getSelectAll/BNINFR", ["bnCd", "s_bnCd"], "BNCD", "BNNM");
+//    Util.loadListCommon("/stckInfo/getSelectAll", ["stckTea", "s_stckTea"], "STCKTEA", "STCKNM");
+    Util.loadListCommon("/common/getSelectAll/STCKINFO", ["stckTea", "s_stckTea"], "STCKTEA", "STCKNM");
 }
 
 /* -------------------------------------------------------------------------- */
 /*                🔥 검색/전체 조회 자동 전환 + 페이지 이동 유지                    */
 /* -------------------------------------------------------------------------- */
 async function loadStckDlngDsctn(page = 1, size = 10) {
-    await loadPageDataCommon({
+    await Util.loadPageDataCommon({
         api: API_URL,
         searchState: SEARCH_STATE,
         page,
         size,
         onData: (data) => renderTable(data.list, data.totalCount),
         onPaging: ({ page, totalPages }) =>
-            renderPagination({
+            Util.renderPagination({
                 container: "pagination",
                 page,
                 totalPages,
@@ -253,7 +255,6 @@ async function loadStckDlngDsctn(page = 1, size = 10) {
         onRestoreSearchInputs: restoreSearchInputs
     });
 }
-
 
 /* 검색 input 값 복원 */
 function restoreSearchInputs() {
@@ -267,7 +268,7 @@ function restoreSearchInputs() {
 /*                               엑셀 다운로드                                  */
 /* -------------------------------------------------------------------------- */
 function downloadBankExcel() {
-    downloadExcelFromTable({
+    Util.downloadExcelFromTable({
         tableId: 'bankTable',
         url: '/stckDlngDsctn/excel/bank',
         fileName: '주식거래내역_'+getToday("YYYY-MM-DD")

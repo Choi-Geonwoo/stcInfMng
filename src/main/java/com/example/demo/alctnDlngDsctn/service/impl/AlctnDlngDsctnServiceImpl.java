@@ -8,6 +8,7 @@ import com.example.demo.util.pagination.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Base64;
@@ -168,6 +169,7 @@ public class AlctnDlngDsctnServiceImpl implements AlctnDlngDsctnService {
     /**
      * 배당거래내역을 업데이트합니다.
      */
+    @Transactional
     @Override
     public Map<String, Object> update(String id, Map<String, Object> req, MultipartFile file ) {
         req.put("alctnDlngDsctn_no", id);
@@ -175,8 +177,6 @@ public class AlctnDlngDsctnServiceImpl implements AlctnDlngDsctnService {
         int updated = alctnDlngDsctnMapper.update(req);
         // 파일 전송 여부
             // 2) 파일 저장
-            //MultipartFile file = (MultipartFile) req.get("file");
-            log.info("file   " + (file != null));
             if (file != null && !file.isEmpty()) {
                 // 파일명 추가
                 req.put("fileName", file.getOriginalFilename());

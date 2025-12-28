@@ -6,6 +6,10 @@
     <title>주식거래내역</title>
 
     <link rel="stylesheet" type="text/css" th:href="@{/CSS/com/com.css}">
+
+    <link rel="stylesheet" th:href="@{/CSS/com/modal.css}">
+    <script type="text/javascript" th:src="@{/JS/com/todayUitl.js}" defer></script>
+
     <script type="module" th:src="@{/JS/stckDlngDsctn/stckDlngDsctn.js}" defer></script>
     <script type="text/javascript" th:src="@{/JS/com/comUitl.js}" defer></script>
     <script type="text/javascript" th:src="@{/JS/com/todayUitl.js}" defer></script>
@@ -174,6 +178,8 @@
 <!--    <button>다음</button>-->
 <!--</div>-->
 <div class="pagination" id="pagination"></div>
+<!-- 모달창 -->
+<div th:replace="./view/common/modal :: modal"></div>
 
 </body>
 </html>

@@ -15,6 +15,7 @@ let monthList = [];
 let currentId = null; // 수정 대상 ID
 let chartObj = null;
 let lastRawData = null;
+let editing = false;   // 🔥 중복 호출 방지 락
 
 const fieldMap = {
     dlngYmd: "DLNGYMD",
@@ -61,16 +62,27 @@ async function init() {
     document.querySelectorAll('.modal-close-btn, .btn-cancel').forEach(btn =>
         btn.addEventListener('click', closeModal)
     );
-    document.querySelectorAll('.btn-save').forEach(btn =>
-        btn.addEventListener('click', submitModal)
-    );
-    document.querySelectorAll('.btn-edit').forEach(btn =>
-        btn.addEventListener('click', editModal)
-    );
-    document.querySelectorAll('.btn-delete').forEach(btn =>
-        btn.addEventListener('click', delModal)
-    );
 
+    document.querySelectorAll('.btn-save').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.preventDefault();   // submit 완전 차단
+            submitModal();
+        });
+    });
+
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.preventDefault();   // submit 완전 차단
+            editModal();
+        });
+    });
+
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.preventDefault();   // submit 완전 차단
+            delModal();
+        });
+    });
 
 
     // 탭 클릭 시 차트 재렌더링
@@ -206,37 +218,116 @@ function setSelectValue(selectId, value, list, valKey, textKey) {
  * 월별 주식 거래 내역을 그룹화하여 비교 테이블을 렌더링합니다.
  * @param {Array} list - 월별 주식 거래 내역 데이터 목록
  */
-function populateTable(list) {
-    const grouped = list.reduce((acc, item) => {
-        if (!acc[item.STCKNM]) acc[item.STCKNM] = [];
-        acc[item.STCKNM].push(item);
-        return acc;
-    }, {});
+/* ----------------------------------------------------------- */
+/* 1. 데이터 그룹 구조                                            */
+/* ----------------------------------------------------------- */
+ function groupByStockYearMonth(list){
+     const map = {};
+     const yearSet = new Set();
 
-    const stockNames = Object.keys(grouped);
+     list.forEach(item=>{
+         const name = item.STCKNM;
+         const ym = item.DLNG_YM;          // 2024-03
+         const year = ym.slice(0,4);
+         const month = ym.slice(5,7);
+
+         yearSet.add(year);
+
+         if(!map[name]) map[name] = {};
+         if(!map[name][year]) map[name][year] = {};
+         if(!map[name][year][month]) map[name][year][month] = [];
+
+         map[name][year][month].push(item);
+     });
+
+     return { map, years: [...yearSet].sort() };
+ }
+/* ----------------------------------------------------------- */
+/* 1. 메인 함수                                                  */
+/* ----------------------------------------------------------- */
+function populateTable(list){
+    const { map, years } = groupByStockYearMonth(list);
+    const stockNames = Object.keys(map);
+
+    const html = [
+        renderHeader(stockNames, years),
+        renderBody(map, stockNames, years)
+    ].join('');
+
+    const container = document.getElementById("dataList");
+    container.innerHTML = html;
+    bindDetailEvents(container);
+}
+
+/* ----------------------------------------------------------- */
+/*2. 데이터 가공 (성능 핵심)                                      */
+/* ----------------------------------------------------------- */
+function groupByStockAndMonth(list) {
+    const result = {};
+
+    list.forEach(item => {
+        const name = item.STCKNM;
+        const month = item.DLNG_YM?.slice(5, 7);
+
+        if (!result[name]) result[name] = {};
+        result[name][month] = item; // 월별 바로 접근 가능
+    });
+
+    return result;
+}
+
+/* ----------------------------------------------------------- */
+/*3. 헤더 렌더링                                                 */
+/* ----------------------------------------------------------- */
+function renderHeader(stockNames, years){
     let html = `<div class="compare-header"><div class="compare-title">월</div>`;
-    stockNames.forEach(name => html += `<div class="compare-title">${name}</div>`);
-    html += `</div>`;
-
-    for (let month = 1; month <= 12; month++) {
-        const monthStr = month.toString().padStart(2,'0');
-        html += '<div class="compare-row">';
-        html += `<div class="compare-cell">${month}월</div>`;
-        stockNames.forEach(name => {
-            const item = grouped[name].find(x => x.DLNG_YM.slice(5,7) === monthStr);
-            html += item
-                ? `<div class="compare-cell detail-cell" data-id="${item.ALCTNDLNGDSCTN_NO}">
-                     <div class="dlng">${item.DLNG_YM}</div>
-                     <div class="dlgamt">${item.DLNGAMT}</div>
-                   </div>`
-                : `<div class="compare-cell"></div>`;
+    stockNames.forEach(name=>{
+        years.forEach(year=>{
+                html += `<div class="compare-title">${name}<br>${year}</div>`;
         });
-        html += '</div>';
-    }
-    document.getElementById("dataList").innerHTML = html;
+    });
 
-    document.querySelectorAll('.detail-cell').forEach(div => {
-        div.addEventListener('click', () => showDetailModal(div.dataset.id));
+    html += `</div>`;
+    return html;
+}
+
+/* ----------------------------------------------------------- */
+/*4. 바디 렌더링                                                 */
+/* ----------------------------------------------------------- */
+function renderBody(map, stockNames, years){
+    let html = '';
+
+    for(let m=1;m<=12;m++){
+        const month = String(m).padStart(2,'0');
+        html += `<div class="compare-row"><div class="compare-cell">${m}월</div>`;
+
+        stockNames.forEach(name=>{
+            years.forEach(year=>{
+                const items = map[name]?.[year]?.[month];
+                const item = items ? items[items.length-1] : null;
+
+                html += item ? `
+                    <div class="compare-cell detail-cell"
+                         data-id="${item.ALCTNDLNGDSCTN_NO}">
+                        <div class="dlng">${item.DLNG_YM}</div>
+                        <div class="dlgamt">${item.DLNGAMT}</div>
+                    </div>`
+                    : `<div class="compare-cell"></div>`;
+            });
+        });
+
+        html += `</div>`;
+    }
+    return html;
+}
+
+/* ----------------------------------------------------------- */
+/*5. 이벤트 바인딩 (버블링 방식 → 빠르고 안전)                       */
+/* ----------------------------------------------------------- */
+function bindDetailEvents(container) {
+    container.addEventListener('click', e => {
+        const cell = e.target.closest('.detail-cell');
+        if (cell) showDetailModal(cell.dataset.id);
     });
 }
 
@@ -473,23 +564,48 @@ function submitModal() {
 }
 **/
 
-function editModal() {
-    if (!currentId) return alert("수정할 항목을 선택해주세요.");
+function editModal(e) {
+    if (e) e.preventDefault();
+
+    if (editing) return;   // 이미 실행 중이면 차단
+    editing = true;
+
+    if (!currentId) {
+        editing = false;
+        return alert("수정할 항목을 선택해주세요.");
+    }
+
     const formData = new FormData();
     const fields = ["bnCd","stckTea","dlngYmd","dlngAmt","dvdnd"];
-    for(const f of fields){
+
+    for (const f of fields) {
         const val = document.getElementById(f).value;
-        if(!val && f !== "dvdnd") return alert("필수 입력값을 확인하세요.");
+        if (!val && f !== "dvdnd") {
+            editing = false;
+            return alert("필수 입력값을 확인하세요.");
+        }
         formData.append(f, val);
     }
-    const file = document.getElementById("realFile").files[0];
-    if(file) formData.append("file", file);
 
-    fetch(`/alctnDlngDsctn/update/${currentId}`, { method: "POST", body: formData })
-        .then(res => res.json())
-        .then(resp => { alert(resp.message || "수정 완료"); closeModal(); })
-        .catch(err => { console.error(err); alert("수정 실패"); });
+    const file = document.getElementById("realFile").files[0];
+    if (file) formData.append("file", file);
+
+    fetch(`/alctnDlngDsctn/update/${currentId}`, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(resp => {
+        alert(resp.message || "수정 완료");
+        closeModal();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("수정 실패");
+    })
+    .finally(() => editing = false);   // 🔓 락 해제
 }
+
 /**
  * 현재 선택된 항목을 서버에서 삭제합니다.
  * @returns {void}
@@ -573,11 +689,10 @@ chartObj = new Chart(canvas, {
 });
 }
 
-/**
- * 주식 거래 내역 데이터를 로드하고 페이지네이션을 처리합니다.
- */
-/*                🔥 검색/전체 조회 자동 전환 + 페이지 이동 유지                 */
-/* -------------------------------------------------------------------------- */
+/*-------------------------------------------------------------------------- */
+/* 주식 거래 내역 데이터를 로드하고 페이지네이션을 처리합니다.                         */
+/*                🔥 검색/전체 조회 자동 전환 + 페이지 이동 유지                   */
+/* ------------------------------------------------------------------------- */
 async function loadStckDlngDsctn(page = 1, size = 10) {
     await loadPageDataCommon({
         api: API_URL,
@@ -600,7 +715,6 @@ async function loadStckDlngDsctn(page = 1, size = 10) {
 /**
  * 검색 상태에 저장된 파라미터로 검색 입력 필드를 복원합니다.
  */
-/* 검색 input 값 복원 */
 function restoreSearchInputs() {
     Object.entries(SEARCH_STATE.params).forEach(([key, value]) => {
         const input = document.getElementById("s_" + key);
@@ -615,11 +729,9 @@ function restoreSearchInputs() {
  * @param {string} stckTea - 선택된 주식의 종목 코드
  */
 function onChangeStock(stckTea) {
-    console.log("#####   1    " + stckTea);
     if (!stckTea) return;
 
     const selectedStock = stockList.find(s => s.STCKTEA === stckTea);
-    console.log("#####   2    " , selectedStock);
     if (!selectedStock) return;
 
     const mappedBnCd = selectedStock.BNCD;

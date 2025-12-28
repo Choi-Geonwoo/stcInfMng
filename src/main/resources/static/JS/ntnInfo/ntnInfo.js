@@ -92,7 +92,6 @@ async function handleSearch() {
             return;
         }
         renderTable(res.data,  res.data.length);
-        console.log(res);
     } catch (err) {
         console.error(err);
         await Util.AppAlert(MESSAGES.SEARCH_ERROR);
@@ -129,10 +128,10 @@ function initTableHandlers() {
 //            console.log(data);
             try {
                 await Util.request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
-                await Util.AppAlert("수정 완료");
+                Util.AppAlert("수정 완료");
             } catch (err) {
                 console.log(err);
-                await Util.AppAlert(MESSAGES.UPDATE_FAIL);
+                Util.AppAlert(MESSAGES.UPDATE_FAIL);
             }
         },
         onDelete: async (id, tr) => {
@@ -140,10 +139,10 @@ function initTableHandlers() {
             try {
                 await Util.request(`${API_URL.DELETE_BASE}/${id}`, 'DELETE');
                 tr.remove();
-                await Util.AppAlert(MESSAGES.DELETE_SUCCESS);
+                Util.AppAlert(MESSAGES.DELETE_SUCCESS);
             } catch (err) {
                 console.error(err);
-                await Util.AppAlert(MESSAGES.DELETE_FAIL);
+                Util.AppAlert(MESSAGES.DELETE_FAIL);
             }
         }
     });

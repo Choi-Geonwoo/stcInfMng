@@ -39,8 +39,6 @@ src
      │             ├─ controller
      │             ├─ service
      │             ├─ mapper
-     │             ├─ dto
-     │             └─ config
      └─ resources
          ├─ mapper
          └─ application.yml

@@ -24,4 +24,10 @@ public interface FileInfoMapper {
 
     /** 삭제 파일정보 */
     int delete(String alctnDlngDsctn_no);
+/*
+*   DB 결과	MyBatis 반환
+    0	false
+    1 이상	true
+* */
+    boolean existsByOwner(String id);
 }

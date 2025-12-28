@@ -1,5 +1,6 @@
-import { request } from '/JS/util/fetchUtil.js';
-import { populateTableCommon, initRowHandler, extractRowData } from '/JS/util/TableCommonUitl.js';
+//import { Util.request } from '/JS/util/fetchUtil.js';
+//import { Util.populateTableCommon, Util.initRowHandler, Util.extractRowData } from '/JS/util/TableCommonUitl.js';
+import * as Util from '/JS/util/index.js';
 // fillSelect는 현재 코드에서 사용되지 않으므로 제거하거나 주석 처리
 // import { fillSelect } from '/JS/util/selectUitl.js';
 
@@ -60,13 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 async function loadBankList() {
     try {
-        const result = await request(API_URL.GET_ALL, "GET");
+        const result = await Util.request(API_URL.GET_ALL, "GET");
         if (!result || !result.data) return;
 
         renderTable(result.data);
     } catch (err) {
         console.error(err);
-        alert(MESSAGES.LOAD_FAIL);
+        await Util.AppAlert(MESSAGES.LOAD_FAIL);
     }
 }
 
@@ -74,28 +75,28 @@ async function loadBankList() {
  * 테이블 행의 수정 및 삭제 이벤트를 초기화합니다.
  */
 function initTableHandlers() {
-    initRowHandler(DOM_ID.TABLE_BODY, {
+    Util.initRowHandler(DOM_ID.TABLE_BODY, {
         onEdit: async (id, tr) => {
             console.log(id);
-            const data = extractRowData(tr);
+            const data = Util.extractRowData(tr);
             console.log(data);
             try {
-                await request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
-                alert(MESSAGES.UPDATE_SUCCESS);
+                await Util.request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
+                Util.AppAlert(MESSAGES.UPDATE_SUCCESS);
                 window.location.replace(window.location.href);
             } catch (err) {
-                alert(MESSAGES.UPDATE_FAIL);
+                Util.AppAlert(MESSAGES.UPDATE_FAIL);
             }
         },
         onDelete: async (id, tr) => {
             if (!confirm(MESSAGES.DELETE_CONFIRM)) return;
             try {
-                await request(`${API_URL.DELETE_BASE}/${id}`, 'DELETE');
+                await Util.request(`${API_URL.DELETE_BASE}/${id}`, 'DELETE');
                 tr.remove();
-                alert(MESSAGES.DELETE_SUCCESS);
+                Util.AppAlert(MESSAGES.DELETE_SUCCESS);
                 window.location.replace(window.location.href);
             } catch (err) {
-                alert(MESSAGES.UPDATE_FAIL); // 삭제 실패 메시지를 수정 실패로 통일할지, 별도 정의할지 결정
+                Util.AppAlert(MESSAGES.UPDATE_FAIL); // 삭제 실패 메시지를 수정 실패로 통일할지, 별도 정의할지 결정
             }
         }
     });
@@ -113,19 +114,19 @@ async function handleCreate() {
     const fields = ["bnCd","bnNm"];
     for(const f of fields){
         const val = document.getElementById(f).value;
-        if(!val && f !== "dvdnd") return alert("필수 입력값을 확인하세요.");
+        if(!val && f !== "dvdnd") return await Util.AppAlert("필수 입력값을 확인하세요.");
     }
     const data = { bnCd, bnNm, useYn, delYn };
 
     try {
-        await request(API_URL.CREATE, 'POST', data);
-        alert(MESSAGES.CREATE_SUCCESS);
+        await Util.request(API_URL.CREATE, 'POST', data);
+        await Util.AppAlert(MESSAGES.CREATE_SUCCESS);
 //        loadBankList(); // 등록 후 리스트 갱신
             window.location.replace(window.location.href);
         // 입력 필드 초기화 로직 추가 고려
     } catch (err) {
         console.error(err);
-        alert(MESSAGES.CREATE_FAIL_BASE + err);
+        await Util.AppAlert(MESSAGES.CREATE_FAIL_BASE + err);
     }
 }
 
@@ -138,10 +139,10 @@ async function handleSearch() {
     const bnNm = document.querySelector('section.search input[name="bnNm"]').value.trim();
 
     try {
-        const result = await request(`${API_URL.SEARCH}?bnCd=${bnCd}&bnNm=${bnNm}`, 'GET');
+        const result = await Util.request(`${API_URL.SEARCH}?bnCd=${bnCd}&bnNm=${bnNm}`, 'GET');
 
         if (!result || !result.data || result.data.length === 0) {
-            alert(MESSAGES.SEARCH_NO_RESULT);
+            await Util.AppAlert(MESSAGES.SEARCH_NO_RESULT);
 //            document.getElementById(DOM_ID.TABLE_BODY).innerHTML = "";
             window.location.replace(window.location.href);
             return;
@@ -150,7 +151,7 @@ async function handleSearch() {
         renderTable(result.data);
     } catch (err) {
         console.error(err);
-        alert(MESSAGES.SEARCH_ERROR);
+        await Util.AppAlert(MESSAGES.SEARCH_ERROR);
     }
 }
 
@@ -159,7 +160,7 @@ async function handleSearch() {
  * @param {Array<Object>} data - 테이블에 표시할 데이터 배열
  */
 function renderTable(data) {
-    populateTableCommon(DOM_ID.TABLE_BODY, data, [
+    Util.populateTableCommon(DOM_ID.TABLE_BODY, data, [
         { key: 'BNINFR_NO', type: 'label', nameTemplate: 'banks[{id}].BNINFR_NO', readOnly: true }, // PK는 읽기 전용으로 설정
         { key: 'BNCD', type: 'text', nameTemplate: 'banks[{id}].BNCD' },
         { key: 'BNNM', type: 'text', nameTemplate: 'banks[{id}].BNNM' },
@@ -179,4 +180,4 @@ function renderTable(data) {
 }
 
 // 기존의 loadBankList는 이제 renderTable을 호출하도록 변경되었습니다.
-// 나머지 주석 처리된 함수 (editBank, deleteBank)는 initRowHandler로 인해 불필요하므로 삭제합니다.
+// 나머지 주석 처리된 함수 (editBank, deleteBank)는 Util.initRowHandler로 인해 불필요하므로 삭제합니다.

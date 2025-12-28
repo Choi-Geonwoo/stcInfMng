@@ -1,6 +1,7 @@
 /* ------------------------------- 공통 유틸 ------------------------------- */
 export function fillSelect(id, list, valKey, textKey) {
     const select = document.getElementById(id);
+
     select.innerHTML = `<option value="">선택</option>`;
 
     list.forEach((item) => {

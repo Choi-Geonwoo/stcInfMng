@@ -7,9 +7,9 @@
 
     <link rel="stylesheet" type="text/css" th:href="@{/CSS/com/com.css}">
     <link rel="stylesheet" th:href="@{/CSS/com/modal.css}">
+    <script type="module" th:src="@{/JS/ntnInfo/ntnInfo.js}" defer></script>
     <script type="text/javascript" th:src="@{/JS/com/comUitl.js}" defer></script>
     <script type="text/javascript" th:src="@{/JS/com/todayUitl.js}" defer></script>
-    <script type="module" th:src="@{/JS/ntnInfo/ntnInfo.js}" defer></script>
 <!--    <script type="text/javascript" th:src="@{/JS/util/fetchUtil.js}" defer></script>-->
 
     <style>
@@ -114,5 +114,6 @@
 <!--    <button>다음</button>-->
 <!--</div>-->
 
+<div th:replace="./view/common/modal :: modal"></div>
 </body>
 </html>

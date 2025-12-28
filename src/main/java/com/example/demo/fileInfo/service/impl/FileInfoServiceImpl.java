@@ -77,9 +77,12 @@ public class FileInfoServiceImpl implements FileInfoService {
                 fileMap.put("delYn", "N");
                 fileMap.put("refTable", "alctnDlngDsctn");
 
-                int updated = fileInfoMapper.update(fileMap);
-                if (updated > 0) {
-                    fileInfoMapper.insert(fileMap); // 새 파일 정보 추가
+                boolean exists = fileInfoMapper.existsByOwner(id);
+
+                if (exists) {
+                    fileInfoMapper.update(fileMap);   // 기존 파일 교체
+                } else {
+                    fileInfoMapper.insert(fileMap);   // 최초 등록
                 }
             }
 
