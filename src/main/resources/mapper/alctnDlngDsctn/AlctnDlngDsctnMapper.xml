@@ -123,8 +123,8 @@
              B.NTNNM    /*국가명*/
             ,B.STCKNM   /*주식명*/
             ,A.DLNGYMD  /*배당일자*/
-            ,A.DVDND    /*배당금*/
-            ,A.DLNGAMT  /*거래금액*/
+            ,FN_FORMAT_AMOUNT(A.DVDND, b.NTNCD ) AS DVDND    /*배당금*/
+            ,FN_FORMAT_AMOUNT(A.DLNGAMT, b.NTNCD ) AS DLNGAMT  /*거래금액*/
         FROM ALCTNDLNGDSCTN A /* 배당거래내역 테이블 */
         INNER JOIN STCKINFO C /* 주식정보 테이블 */
             ON A.STCKTEA = C.STCKTEA /* 주식티커로 조인 */
@@ -201,7 +201,7 @@
 
     <!-- 특정 배당거래내역 조회 -->
     <select id="findById" parameterType="String" resultType="map">
-        SELECT  /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper - 배당거래내역 */
+        SELECT  /* SQL : com.example.demo.alctnDlngDsctn.mapper.AlctnDlngDsctnMapper.findById - 배당거래내역 */
                      A.ALCTNDLNGDSCTN_NO /*순번*/
                     ,B.BNCD              /*은행티커*/
                     ,B.BNNM              /*은행명*/
@@ -209,8 +209,10 @@
                     ,C.STCKNM            /*주식명*/
                     ,D.NTNNM             /*국가명*/
                     ,A.DLNGYMD           /*거래일자*/
-                    ,A.DLNGAMT           /*거래금액*/
-                    ,A.DVDND             /*배당금*/
+                    /*,A.DLNGAMT           거래금액*/
+                    /*,A.DVDND             배당금*/
+                    ,FN_FORMAT_AMOUNT(A.DVDND, c.NTNCD ) AS DVDND    /*배당금*/
+                    ,FN_FORMAT_AMOUNT(A.DLNGAMT, c.NTNCD ) AS DLNGAMT  /*거래금액*/
                     ,A.DELYN             /*삭제여부*/
                     ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
                     ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY

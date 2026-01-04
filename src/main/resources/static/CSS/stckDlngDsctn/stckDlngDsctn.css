@@ -1,0 +1,39 @@
+
+.window-card {
+  border: 3px solid #666;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* 상단 바 */
+.window-header {
+  height: 42px;
+  border-bottom: 3px solid #666;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+}
+
+/* 버튼 영역 */
+.btns {
+  display: flex;
+  gap: 8px;
+}
+
+.btn_n {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 2px solid #999;
+}
+
+.red    { background: #f28b82; }
+.yellow { background: #fde293; }
+.green  { background: #b7e4a1; }
+
+/* 아래 큰 흰 영역 */
+.window-body {
+  background: #fff;
+}

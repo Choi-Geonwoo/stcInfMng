@@ -9,60 +9,14 @@
     <select id="countAll" resultType="int" parameterType="map">
         SELECT /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.countAll - 주식거래내역 */
             COUNT(*)
-        FROM STCKDLNGDSCTN A
-        , STCKINFO B
-        , BNINFR   C
-        WHERE A.STCKTEA = B.STCKTEA
-        AND A.BNCD = C.BNCD(+)
-        AND A.DELYN = 'N'
-        <if test='start_dlngymd != null and start_dlngymd != ""'>
-            AND a.DLNGYMD  BETWEEN #{start_dlngymd} AND #{end_dlngymd}
-        </if>
-        <if test='bnCd != null and bnCd != ""'>
-            AND A.BNCD = #{bnCd}
-        </if>
-        <if test='stckTea != null and stckTea != ""'>
-            AND A.STCKTEA = #{stckTea}
-        </if>
-        <if test='clsf != null and clsf != ""'>
-            AND A.CLSF = #{clsf}
-        </if>
+        FROM (
+            <include refid="commonColumns"/>
+        )
     </select>
 
     <!-- 모든 주식거래내역 조회 -->
     <select id="findAll" resultType="map">
-        SELECT /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.findAll - 주식거래내역 */
-        A.STCKDLNGDSCTN_NO
-        ,B.STCKNM
-        ,A.DLNGYMD
-        ,A.BNCD
-        ,C.BNNM
-        ,A.STCKTEA
-        ,A.DLNGAMT
-        ,A.DELYN
-        ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
-        ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
-        ,A.CLSF               /*항목구분*/
-        ,A.BYNGYN             /*매수여부*/
-        ,A.STCKCNT            /*주식수*/
-        FROM STCKDLNGDSCTN A
-        , STCKINFO B
-        , BNINFR   C
-        WHERE A.STCKTEA = B.STCKTEA
-        AND A.BNCD = C.BNCD
-        AND A.DELYN = 'N'
-        <if test='start_dlngymd != null and start_dlngymd != ""'>
-            AND a.DLNGYMD  BETWEEN #{start_dlngymd} AND #{end_dlngymd}
-        </if>
-        <if test='bnCd != null and bnCd != ""'>
-            AND A.BNCD = #{bnCd}
-        </if>
-        <if test='stckTea != null and stckTea != ""'>
-            AND A.STCKTEA = #{stckTea}
-        </if>
-        <if test='clsf != null and clsf != ""'>
-            AND A.CLSF = #{clsf}
-        </if>
+        <include refid="commonColumns"/>
         ORDER BY A.DLNGYMD DESC
         <if test='offset != null and offset != ""'>
         OFFSET #{offset} ROWS
@@ -74,38 +28,7 @@
 
     <!-- 특정 주식거래내역 조회 -->
     <select id="findById" parameterType="map" resultType="map">
-        SELECT /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper.findById - 주식거래내역 */
-             A.STCKDLNGDSCTN_NO
-            ,B.STCKNM
-            ,A.DLNGYMD
-            ,A.BNCD
-            ,C.BNNM
-            ,A.STCKTEA
-            ,A.DLNGAMT
-            ,A.DELYN
-            ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
-            ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
-            ,A.CLSF               /*항목구분*/
-            ,A.BYNGYN             /*매수여부*/
-            ,A.STCKCNT            /*주식수*/
-        FROM STCKDLNGDSCTN A
-            , STCKINFO B
-            , BNINFR   C
-        WHERE A.STCKTEA = B.STCKTEA
-           AND A.BNCD = C.BNCD
-           AND A.DELYN = 'N'
-        <if test='start_dlngymd != null and start_dlngymd != ""'>
-            AND a.DLNGYMD  BETWEEN #{start_dlngymd} AND #{end_dlngymd}
-        </if>
-        <if test='bnCd != null and bnCd != ""'>
-            AND A.BNCD = #{bnCd}
-        </if>
-        <if test='stckTea != null and stckTea != ""'>
-            AND A.STCKTEA = #{stckTea}
-        </if>
-        <if test='clsf != null and clsf != ""'>
-            AND A.CLSF = #{clsf}
-        </if>
+        <include refid="commonColumns"/>
         ORDER BY A.DLNGYMD DESC
         OFFSET #{offset} ROWS
         FETCH NEXT #{limit} ROWS ONLY
@@ -197,4 +120,38 @@
         WHERE STCKDLNGDSCTN_NO = #{stckdlngdsctn_no}
     </update>
 
+    <sql id="commonColumns">
+        SELECT /* SQL : com.example.demo.stckDlngDsctn.mapper.StckDlngDsctnMapper - 주식거래내역 */
+             A.STCKDLNGDSCTN_NO
+            ,B.STCKNM
+            ,A.DLNGYMD
+            ,A.BNCD
+            ,C.BNNM
+            ,A.STCKTEA
+            ,A.DLNGAMT
+            ,A.DELYN
+            ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+            ,A.CLSF               /*항목구분*/
+            ,A.BYNGYN             /*매수여부*/
+            ,A.STCKCNT            /*주식수*/
+        FROM STCKDLNGDSCTN A
+        , STCKINFO B
+        , BNINFR   C
+        WHERE A.STCKTEA = B.STCKTEA
+        AND A.BNCD = C.BNCD
+        AND A.DELYN = 'N'
+        <if test='start_dlngymd != null and start_dlngymd != ""'>
+            AND a.DLNGYMD  BETWEEN #{start_dlngymd} AND #{end_dlngymd}
+        </if>
+        <if test='bnCd != null and bnCd != ""'>
+            AND A.BNCD = #{bnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA = #{stckTea}
+        </if>
+        <if test='clsf != null and clsf != ""'>
+            AND A.CLSF = #{clsf}
+        </if>
+    </sql>
 </mapper>

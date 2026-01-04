@@ -10,58 +10,14 @@
     <select id="countAll" resultType="int" parameterType="map">
         SELECT /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper.countAll - 주식정보 */
              COUNT(1)
-        FROM STCKINFO A              /*주식정보*/
-        LEFT OUTER JOIN NTNINFO B    /*국가정보*/
-          ON (A.NTNCD = B.NTNCD
-             AND B.DELYN = 'N'
-             AND B.USEYN = 'Y')
-        LEFT OUTER JOIN STOCK_BALANCE C /*주식수량*/
-          ON (a.STCKINFO_NO  = C.STCKINFO_NO)
-        WHERE A.DELYN = 'N'
-             AND A.USEYN = 'Y'
-        <if test='ntnCd != null and ntnCd != ""'>
-            AND A.NTNCD = #{ntnCd}
-        </if>
-        <if test='stckTea != null and stckTea != ""'>
-            AND A.STCKTEA = #{stckTea}
-        </if>
-        <if test='alctn != null and alctn != ""'>
-            AND A.ALCTN = #{alctn}
-        </if>
+        FROM (
+            <include refid="commonColumns"/>
+        )
     </select>
 
     <!-- 모든 주식정보 조회 -->
     <select id="findAll" resultType="map">
-        SELECT /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper.findAll - 주식정보 */
-             A.STCKINFO_NO
-            ,C.STOCK_BALANCE_NO
-            ,A.NTNCD       /*국가코드*/
-            ,B.NTNNM       /*국가명*/
-            ,A.STCKTEA     /*주식티커*/
-            ,A.STCKNM      /*주식명*/
-            ,A.ALCTN       /*배당주기*/
-            ,NVL(C.QTY, 0) AS QTY         /*수량*/
-            ,TO_CHAR(C.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
-            ,TO_CHAR(C.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
-            ,NVL(C.DELYN, 'N') AS DELYN
-        FROM STCKINFO A              /*주식정보*/
-        LEFT OUTER JOIN NTNINFO B    /*국가정보*/
-            ON (A.NTNCD = B.NTNCD
-                AND B.DELYN = 'N'
-                AND B.USEYN = 'Y')
-        LEFT OUTER JOIN STOCK_BALANCE C /*주식수량*/
-            ON (a.STCKINFO_NO  = C.STCKINFO_NO)
-        WHERE A.DELYN = 'N'
-          AND A.USEYN = 'Y'
-        <if test='ntnCd != null and ntnCd != ""'>
-            AND A.NTNCD = #{ntnCd}
-        </if>
-        <if test='stckTea != null and stckTea != ""'>
-            AND A.STCKTEA = #{stckTea}
-        </if>
-        <if test='alctn != null and alctn != ""'>
-            AND A.ALCTN = #{alctn}
-        </if>
+        <include refid="commonColumns"/>
         ORDER BY VALIDATE_CONVERSION(A.STCKTEA AS NUMBER), A.STCKTEA
         OFFSET #{offset} ROWS
         FETCH NEXT #{limit} ROWS ONLY
@@ -69,36 +25,7 @@
 
     <!-- 특정 주식정보 조회 -->
     <select id="findById" parameterType="long" resultType="map">
-        SELECT /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper.findById - 주식정보 */
-             A.STCKINFO_NO
-            ,C.STOCK_BALANCE_NO
-            ,A.NTNCD       /*국가코드*/
-            ,B.NTNNM       /*국가명*/
-            ,A.STCKTEA     /*주식티커*/
-            ,A.STCKNM      /*주식명*/
-            ,A.ALCTN       /*배당주기*/
-            ,NVL(C.QTY, 0) AS QTY         /*수량*/
-            ,TO_CHAR(C.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
-            ,TO_CHAR(C.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
-            ,NVL(C.DELYN, 'N') AS DELYN
-        FROM STCKINFO A              /*주식정보*/
-        LEFT OUTER JOIN NTNINFO B    /*국가정보*/
-            ON (A.NTNCD = B.NTNCD
-              AND B.DELYN = 'N'
-              AND B.USEYN = 'Y')
-        LEFT OUTER JOIN STOCK_BALANCE C /*주식수량*/
-            ON (a.STCKINFO_NO  = C.STCKINFO_NO)
-        WHERE A.DELYN = 'N'
-          AND A.USEYN = 'Y'
-        <if test='ntnCd != null and ntnCd != ""'>
-            AND A.NTNCD = #{ntnCd}
-        </if>
-        <if test='stckTea != null and stckTea != ""'>
-            AND A.STCKTEA = #{stckTea}
-        </if>
-        <if test='alctn != null and alctn != ""'>
-            AND A.ALCTN = #{alctn}
-        </if>
+        <include refid="commonColumns"/>
         ORDER BY VALIDATE_CONVERSION(A.STCKTEA AS NUMBER), A.STCKTEA
         OFFSET #{offset} ROWS
         FETCH NEXT #{limit} ROWS ONLY
@@ -177,4 +104,46 @@
             AND C.STCKINFO_NO = #{stckinfo_no}
         ORDER BY A.DLNGYMD
     </select>
+
+
+    <sql id="commonColumns">
+        SELECT /* SQL : com.example.demo.stockBalance.mapper.StockBalanceMapper - 주식정보 */
+             A.STCKINFO_NO
+            ,C.STOCK_BALANCE_NO
+            ,A.NTNCD       /*국가코드*/
+            ,B.NTNNM       /*국가명*/
+            ,A.STCKTEA     /*주식티커*/
+            ,A.STCKNM      /*주식명*/
+            ,A.ALCTN       /*배당주기*/
+            ,NVL(C.QTY, 0) AS QTY         /*수량*/
+            ,(
+                SELECT
+                    FN_FORMAT_AMOUNT(SUM(DLNGAMT), A.NTNCD)
+                FROM
+                    ALCTNDLNGDSCTN TB
+                WHERE  TB.STCKTEA = A.STCKTEA
+            ) AS DLNGAMT                  /*거래금액*/
+            ,TO_CHAR(C.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(C.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+            ,NVL(C.DELYN, 'N') AS DELYN
+        FROM STCKINFO A              /*주식정보*/
+        LEFT OUTER JOIN NTNINFO B    /*국가정보*/
+            ON (A.NTNCD = B.NTNCD
+                AND B.DELYN = 'N'
+                AND B.USEYN = 'Y')
+        LEFT OUTER JOIN STOCK_BALANCE C /*주식수량*/
+            ON (a.STCKINFO_NO  = C.STCKINFO_NO)
+        WHERE A.DELYN = 'N'
+          AND A.USEYN = 'Y'
+        <if test='ntnCd != null and ntnCd != ""'>
+            AND A.NTNCD = #{ntnCd}
+        </if>
+        <if test='stckTea != null and stckTea != ""'>
+            AND A.STCKTEA = #{stckTea}
+        </if>
+        <if test='alctn != null and alctn != ""'>
+            AND A.ALCTN = #{alctn}
+        </if>
+    </sql>
+
 </mapper>

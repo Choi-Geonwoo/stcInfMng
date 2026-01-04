@@ -182,7 +182,7 @@ public class AlctnDlngDsctnServiceImpl implements AlctnDlngDsctnService {
                 req.put("fileName", file.getOriginalFilename());
                 fileInfoService.update(id, req, file);
 
-                fileInfoService.create(file, String.valueOf(req.get("alctnDlngDsctn_no")));
+                //fileInfoService.create(file, String.valueOf(req.get("alctnDlngDsctn_no")));
             }
         if (updated > 0) {
             req.put("status", "success");

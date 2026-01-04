@@ -74,16 +74,16 @@ public class FileInfoServiceImpl implements FileInfoService {
                 fileMap.put("fileType", file.getContentType());
                 fileMap.put("fileSize", file.getSize());
                 fileMap.put("fileData", file.getBytes()); // DB BLOB 저장
-                fileMap.put("delYn", "N");
+//                fileMap.put("delYn", "N");
                 fileMap.put("refTable", "alctnDlngDsctn");
 
-                boolean exists = fileInfoMapper.existsByOwner(id);
+                //boolean exists = fileInfoMapper.existsByOwner(id);
 
-                if (exists) {
+                //if (exists) {
                     fileInfoMapper.update(fileMap);   // 기존 파일 교체
-                } else {
+                //} else {
                     fileInfoMapper.insert(fileMap);   // 최초 등록
-                }
+                //}
             }
 
             // JSON으로 반환할 때는 직렬화 가능한 값만 전달

@@ -36,8 +36,8 @@
     <select id="findById" parameterType="long" resultType="map">
         /* SQL : com.example.demo.ntnInfo.mapper.NtnInfoMapper.findById - 국가정보 */
         SELECT * 
-        FROM NTNINFO
-        WHERE NTNINFO_NO = #{id}
+          FROM NTNINFO
+         WHERE NTNINFO_NO = #{id}
     </select>
 
     <!-- 국가정보 생성 -->
@@ -67,7 +67,8 @@
     <!-- 국가정보 정보 업데이트 -->
     <update id="update" parameterType="map">
         /* SQL : com.example.demo.ntnInfo.mapper.NtnInfoMapper.update - 국가정보 */
-        UPDATE NTNINFO
+        UPDATE
+            NTNINFO
         SET
           NTNCD=#{ntncd}
         , NTNNM=#{ntnnm}

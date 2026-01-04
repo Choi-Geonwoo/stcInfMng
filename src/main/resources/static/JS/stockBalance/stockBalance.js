@@ -107,6 +107,7 @@ function renderTable(data, page, size) {
         },
         { key: 'ALCTN', type: 'label', dataField: 'alctn' },
         { key: 'QTY', type: 'text', dataField: 'qty' },
+        { key: 'DLNGAMT', type: 'label', dataField: 'dlngamt' },
         { key: 'DELYN', type: 'select', dataField: 'delyn', options: SELECT_OPTIONS.DELYN },
         {
             type: 'button',

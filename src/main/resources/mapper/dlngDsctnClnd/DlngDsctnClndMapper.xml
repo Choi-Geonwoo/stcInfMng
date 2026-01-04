@@ -29,9 +29,9 @@
     <select id="findById" parameterType="long" resultType="map">
         SELECT /* SQL : com.example.demo.dlngDsctnClnd.mapper.DlngDsctnClndMapper.findById - 거래내역달력 조회*/
             co001,
- co002,
- co003,
- co004
+             co002,
+             co003,
+             co004
         FROM table
         WHERE id = #{id}
     </select>

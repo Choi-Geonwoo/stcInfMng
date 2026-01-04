@@ -148,7 +148,7 @@ async function onSearch() {
 /*                                 테이블 렌더링                               */
 /* -------------------------------------------------------------------------- */
 function renderTable(data, totalCount) {
-    document.getElementById("countVal").innerHTML = "건수 : "+totalCount;
+//    document.getElementById("countVal").innerHTML = "건수 : "+totalCount;
 //    console.log(totalCount);
     Util.populateTableCommon(DOM_ID.TABLE_BODY, data, [
 

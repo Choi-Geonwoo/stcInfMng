@@ -12,11 +12,20 @@
         총 투자 금액, 총 배당 금액, 총 주식 종목 수를 반환합니다.
     -->
     <select id="getSummary" resultType="map">
-        SELECT
+        SELECT /* SQL ID : com.example.demo.dashboard.mapper.DashboardMapper.getSummary : 대시보드 KPI 요약 정보 */
             SUM(total_invest) AS totalInvest,
             SUM(total_dividend) AS totalDividend,
             ROUND(AVG(total_dividend),2) AS avgDividend,
-            COUNT(*) AS stockCount
+            MAX(
+                (
+                SELECT
+                    COUNT(1)
+                FROM
+                    STCKINFO
+                WHERE DELYN = 'N'
+                AND USEYN = 'Y'
+                )
+            )|| '/'||COUNT(*) AS stockCount
         FROM (
             SELECT
                     S.STCKTEA,
@@ -218,7 +227,7 @@
         JOIN NTNINFO C
             ON B.NTNCD = C.NTNCD
         WHERE A.DELYN = 'N'
-          AND A.DLNGYMD >= TO_CHAR(ADD_MONTHS(SYSDATE, -12), 'YYYYMMDD')
+          /*AND A.DLNGYMD >= TO_CHAR(ADD_MONTHS(SYSDATE, -12), 'YYYYMMDD')*/
         GROUP BY C.NTNNM, SUBSTR(REPLACE(A.DLNGYMD, '-', ''), 1, 6)
         ORDER BY C.NTNNM, MONTH ASC
     </select>

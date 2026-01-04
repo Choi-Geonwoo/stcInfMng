@@ -47,7 +47,7 @@
                 <h3 id="avgDividend">0</h3>
             </div>
             <div class="kpi">
-                <p>보유 종목수</p>
+                <p>보유 종목수 / 배당 종목수</p>
                 <h3 id="stockCount">0</h3>
             </div>
         </div>
@@ -56,6 +56,12 @@
 
         <div class="trend-section">
             <h3>📈 국가별 월별 배당 추이</h3>
+
+            <div class="filter-bar">
+                <select id="yearFilter"></select>
+                <select id="monthFilter"></select>
+            </div>
+
             <div id="country-tab-menu" class="tab-menu"></div>
 
             <div id="trendChartContainer" class="tab-content-area">

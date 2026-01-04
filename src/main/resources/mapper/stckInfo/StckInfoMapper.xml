@@ -10,13 +10,9 @@
     <select id="countAll" resultType="int" parameterType="map">
         SELECT /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper.countAll - 주식정보 건수 */
            COUNT(1)
-        FROM STCKINFO A
-        LEFT OUTER JOIN NTNINFO B
-            ON (A.NTNCD = B.NTNCD
-                AND B.DELYN = 'N'
-                AND B.USEYN = 'Y')
-        WHERE   A.DELYN = 'N'
-            AND A.USEYN = 'Y'
+        FROM (
+            <include refid="commonColumns"/>
+        )
         <if test='ntnCd != null and ntnCd != ""'>
             AND A.NTNCD = #{ntnCd}
         </if>
@@ -33,24 +29,7 @@
 
     <!-- 모든 주식정보 조회 -->
     <select id="findAll" resultType="map">
-        SELECT /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper.findAll - 주식정보 */
-             A.STCKINFO_NO
-            ,A.NTNCD
-            ,B.NTNNM
-            ,A.STCKTEA
-            ,A.STCKNM
-            ,A.ALCTN
-            ,A.USEYN
-            ,A.DELYN
-            ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
-            ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
-        FROM STCKINFO A
-        LEFT OUTER JOIN NTNINFO B
-        ON (A.NTNCD = B.NTNCD
-            AND B.DELYN = 'N'
-            AND B.USEYN = 'Y')
-        WHERE A.DELYN = 'N'
-          AND A.USEYN = 'Y'
+        <include refid="commonColumns"/>
         ORDER BY B.NTNNM
         <if test='offset != null and offset != ""'>
             OFFSET #{offset} ROWS
@@ -62,24 +41,7 @@
 
     <!-- 특정 주식정보 조회 -->
     <select id="findById" parameterType="long" resultType="map">
-        SELECT /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper.findById - 주식정보 */
-             A.STCKINFO_NO
-            ,A.NTNCD
-            ,B.NTNNM
-            ,A.STCKTEA
-            ,A.STCKNM
-            ,A.ALCTN
-            ,A.USEYN
-            ,A.DELYN
-            ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
-            ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
-        FROM STCKINFO A
-        LEFT OUTER JOIN NTNINFO B
-        ON (A.NTNCD = B.NTNCD
-            AND B.DELYN = 'N'
-            AND B.USEYN = 'Y')
-        WHERE A.DELYN = 'N'
-          AND A.USEYN = 'Y'
+        <include refid="commonColumns"/>
         <if test='ntnCd != null and ntnCd != ""'>
             AND A.NTNCD = #{ntnCd}
         </if>
@@ -147,4 +109,24 @@
         WHERE STCKINFO_NO = #{stckInfo_no}
     </delete>
 
+    <sql id="commonColumns">
+        SELECT /* SQL : com.example.demo.stckInfo.mapper.StckInfoMapper - 주식정보 */
+             A.STCKINFO_NO
+            ,A.NTNCD
+            ,B.NTNNM
+            ,A.STCKTEA
+            ,A.STCKNM
+            ,A.ALCTN
+            ,A.USEYN
+            ,A.DELYN
+            ,TO_CHAR(A.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
+            ,TO_CHAR(A.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
+        FROM STCKINFO A
+        LEFT OUTER JOIN NTNINFO B
+            ON (A.NTNCD = B.NTNCD
+                AND B.DELYN = 'N'
+                AND B.USEYN = 'Y')
+        WHERE A.DELYN = 'N'
+        AND A.USEYN = 'Y'
+    </sql>
 </mapper>

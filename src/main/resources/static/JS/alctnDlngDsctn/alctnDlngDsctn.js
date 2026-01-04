@@ -508,18 +508,23 @@ function initFileInput() {
     const fileNameSpan = document.getElementById("fileName");
     const previewImg = document.getElementById("previewImg");
 
-    realFile?.addEventListener("change", () => {
+    realFile.addEventListener("change", async () => {
         const file = realFile.files[0];
-        fileNameSpan.textContent = file ? file.name : "선택된 파일이 없습니다.";
-        if(file?.type.startsWith("image/")) {
-            previewImg.src = URL.createObjectURL(file);
-            previewImg.style.display = "block";
-        } else {
-            previewImg.src = "";
-            previewImg.style.display = "none";
-        }
+        if (!file) return;
+
+        fileNameSpan.textContent = file.name;
+
+        // 👉 자동 리사이즈
+        const optimized = await resizeImage(file, 1280); // 최대 1280px
+
+        // file input 강제 교체
+        replaceFileInput(realFile, optimized);
+
+        previewImg.src = URL.createObjectURL(optimized);
+        previewImg.style.display = "block";
     });
 }
+
 
 /**
  * 파일 입력 필드를 초기 상태로 재설정합니다.
@@ -754,4 +759,48 @@ function onChangeStock(stckTea) {
         bankSelect.value = mappedBnCd || "";
     }*/
     // 취소 시 → 기존 은행 유지
+}
+/***********
+2️⃣ 리사이즈 엔진 (JS 하단에 추가)
+***********/
+function resizeImage(file, maxSize = 1280) {
+    return new Promise(resolve => {
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = e => {
+            img.onload = () => {
+                let { width, height } = img;
+
+                if (width > height && width > maxSize) {
+                    height *= maxSize / width;
+                    width = maxSize;
+                } else if (height > maxSize) {
+                    width *= maxSize / height;
+                    height = maxSize;
+                }
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(blob => {
+                    resolve(new File([blob], file.name, {
+                        type: file.type,
+                        lastModified: Date.now()
+                    }));
+                }, "image/jpeg", 0.85); // JPG로 변환 + 85% 품질
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function replaceFileInput(input, file) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
 }
