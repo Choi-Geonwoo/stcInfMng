@@ -128,6 +128,14 @@
                 <option value="3">일반계좌</option>
             </select>
         </div>
+
+        <div class="form-group">
+        <label for="chkBox">숨기기</label>
+            <label>
+                <input type="checkbox" id="chkBox" />
+                <span><icon></icon></span>
+            </label>
+        </div>
     </div>
 
     <div style="margin-top:16px; text-align:right;">
@@ -179,7 +187,7 @@
                 <thead>
                 <tr>
                     <th >ID</th>
-                    <th data-key="DLNGYMD">거래일자</th>
+                    <th data-key="DLNGYMD" id="target">거래일자</th>
                     <th data-key="CLSF">항목구분</th>
                     <th data-key="BYNGYN">매수여부</th>
                     <th data-key="BNNM">은행명</th>

@@ -93,6 +93,11 @@ async function init() {
     document.getElementById(DOM_ID.BTN_EXCEL).addEventListener("click", downloadBankExcel);
 
     initTableHandlers();
+
+    document.getElementById("chkBox").addEventListener("change", function () {
+        const target = document.getElementById("target");
+        target.style.display = this.checked ? "none" : "block";
+    });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -272,5 +277,14 @@ function downloadBankExcel() {
         tableId: 'bankTable',
         url: '/stckDlngDsctn/excel/bank',
         fileName: '주식거래내역_'+getToday("YYYY-MM-DD")
+    });
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               항목 숨기기 대상                                */
+/* -------------------------------------------------------------------------- */
+function toggle(selector, hide) {
+    document.querySelectorAll(selector).forEach(el => {
+        el.style.display = hide ? "none" : "";
     });
 }

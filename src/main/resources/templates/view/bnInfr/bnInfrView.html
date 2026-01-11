@@ -28,12 +28,12 @@
         <div class="form-grid">
             <div class="form-group">
                 <label for="bnCd">은행코드</label>
-                <input type="text" id="bnCd" name="bnCd" maxlength="2">
+                <input type="text" id="bnCd" name="bnCd" maxlength="2" data-name="은행코드">
             </div>
 
             <div class="form-group">
                 <label for="bnNm">은행명</label>
-                <input type="text" id="bnNm" name="bnNm">
+                <input type="text" id="bnNm" name="bnNm" data-name="은행명">
             </div>
 
             <div class="form-group">
@@ -120,5 +120,7 @@
 </div>
 -->
 
+<!-- 모달창 -->
+<div th:replace="./view/common/modal :: modal"></div>
 </body>
 </html>

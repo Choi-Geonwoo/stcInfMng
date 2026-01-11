@@ -1,8 +1,12 @@
-import { request } from '/JS/util/fetchUtil.js';
-import { populateTableCommon } from '/JS/util/TableCommonUitl.js';
-import { loadListCommon } from '/JS/util/loadListUitl.js';
-import { loadPageDataCommon } from '/JS/util/loadPageDataCommon.js';
-import { renderPagination } from '/JS/util/pagination.js';
+/*
+import { Util.request } from '/JS/util/fetchUtil.js';
+import { Util.populateTableCommon } from '/JS/util/TableCommonUitl.js';
+import { Util.loadListCommon } from '/JS/util/loadListUitl.js';
+import { Util.loadPageDataCommon } from '/JS/util/Util.loadPageDataCommon.js';
+import { Util.renderPagination } from '/JS/util/pagination.js';
+*/
+
+import * as Util from '/JS/util/index.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     init();
@@ -45,12 +49,12 @@ let SEARCH_STATE = {
     params: {}
 };
 
-
 /**
  * 초기화 함수: 페이지 로드 시 필요한 모든 초기 설정을 수행합니다.
  */
 async function init() {
     initFileInput();
+    initDropZone();   // 🔥 이 줄만 추가
     await loadSelectOptions();
 //    await Promise.all([loadBankList(), loadStockList()]);
     await loadAlctnDlngDsctn();
@@ -107,15 +111,15 @@ async function init() {
  */
 async function loadAlctnDlngDsctn() {
     try {
-        const result = await request("/alctnDlngDsctn/getAll", "GET");
+        const result = await Util.request("/alctnDlngDsctn/getAll", "GET");
         populateTable(result?.data || []);
 
-        const result2 = await request("/alctnDlngDsctn/getMonthAll", "GET");
+        const result2 = await Util.request("/alctnDlngDsctn/getMonthAll", "GET");
         renderTable(result2?.data || []);
         fn_chart(result2?.data);
 
         loadStckDlngDsctn(1);
-//        const result3 = await request(`/alctnDlngDsctn/getWeeklyAll?page=1&size=10`, "GET");
+//        const result3 = await Util.request(`/alctnDlngDsctn/getWeeklyAll?page=1&size=10`, "GET");
 //        renderTable3(result3.data?.list || []);
     } catch (err) {
         console.error(err);
@@ -128,18 +132,18 @@ async function loadAlctnDlngDsctn() {
  * 국가, 주식, 은행 목록을 비동기적으로 가져와 해당 select 요소에 채웁니다.
  */
 async function loadSelectOptions() {
-        //loadListCommon("/ntnInfo/getAll", ["s_ntnCd"], "NTNCD", "NTNNM");
-        loadListCommon("/common/getSelectAll/NTNINFO", ["s_ntnCd"], "NTNCD", "NTNNM");
+        //Util.loadListCommon("/ntnInfo/getAll", ["s_ntnCd"], "NTNCD", "NTNNM");
+        Util.loadListCommon("/common/getSelectAll/NTNINFO", ["s_ntnCd"], "NTNCD", "NTNNM");
 
         // 주식 목록 직접 로드
-        const stockRes = await request("/stckDlngDsctn/getSelectAll", "GET");
+        const stockRes = await Util.request("/stckDlngDsctn/getSelectAll", "GET");
         stockList = stockRes?.data || [];
 //        console.log("stockList : " , stockList);
         populateSelectOptions("stckTea", stockList, "STCKTEA", "STCKNM");
         populateSelectOptions("s_stckTea", stockList, "STCKTEA", "STCKNM");
 
         // 🔥 은행 목록 직접 로드
-        const bankRes = await request("/bninfr/getAll", "GET");
+        const bankRes = await Util.request("/bninfr/getAll", "GET");
 
         bankList = bankRes?.data || [];
         populateSelectOptions("bnCd", bankList, "BNCD", "BNNM");
@@ -336,7 +340,7 @@ function bindDetailEvents(container) {
  * @param {Array} data - 월별 거래 내역 데이터
  */
 function renderTable(data) {
-    populateTableCommon(DOM_ID.TABLE_BODY, data, [
+    Util.populateTableCommon(DOM_ID.TABLE_BODY, data, [
         { key: 'DLNGYMD', type: 'label', nameTemplate: 'banks[{id}].DLNGYMD', readOnly: true },
         { key: 'JANUARY', type: 'label', nameTemplate: 'banks[{id}].JANUARY', dataField: 'JANUARY' },
         { key: 'FEBRUARY', type: 'label', nameTemplate: 'banks[{id}].FEBRUARY', dataField: 'FEBRUARY' },
@@ -358,7 +362,7 @@ function renderTable(data) {
  * @param {Array} data - 주간 거래 내역 데이터
  */
 function renderTable3(data) {
-    populateTableCommon(DOM_ID.TABLE_WEEKLY_BODY, data, [
+    Util.populateTableCommon(DOM_ID.TABLE_WEEKLY_BODY, data, [
         { key: 'DLNGYMD', type: 'label', nameTemplate: 'banks[{id}].DLNGYMD', dataField: 'DLNGYMD', readOnly: true },
         { key: 'NTNNM', type: 'label', nameTemplate: 'banks[{id}].NTNNM' },
         { key: 'STCKNM', type: 'label', nameTemplate: 'banks[{id}].STCKNM', dataField: 'STCKNM' },
@@ -393,14 +397,14 @@ async function searchStockInfo() {
     SEARCH_STATE.params = paramsObj;
 
     try {
-        const result = await request(`/alctnDlngDsctn/search?${params}`, 'GET');
+        const result = await Util.request(`/alctnDlngDsctn/search?${params}`, 'GET');
         if (!result?.data?.length) {
             alert('검색 결과가 없습니다.');
             document.getElementById("bankList").innerHTML = "";
             return;
         }
 
-        const result2 = await request(`/alctnDlngDsctn/getMonthAll?${params}`, "GET");
+        const result2 = await Util.request(`/alctnDlngDsctn/getMonthAll?${params}`, "GET");
         renderTable(result2?.data || []);
         fn_chart(result2?.data);
         populateTable(result.data);
@@ -558,6 +562,7 @@ function submitModal() {
     const file = document.getElementById("realFile").files[0];
     if(file) formData.append("file", file);
 
+
     fetch("/alctnDlngDsctn/create", { method: "POST", body: formData })
         .then(res => res.json())
         .then(resp => { alert(resp.message || "저장 완료"); closeModal(); })
@@ -568,7 +573,6 @@ function submitModal() {
  * @returns {void}
 }
 **/
-
 function editModal(e) {
     if (e) e.preventDefault();
 
@@ -699,14 +703,14 @@ chartObj = new Chart(canvas, {
 /*                🔥 검색/전체 조회 자동 전환 + 페이지 이동 유지                   */
 /* ------------------------------------------------------------------------- */
 async function loadStckDlngDsctn(page = 1, size = 10) {
-    await loadPageDataCommon({
+    await Util.loadPageDataCommon({
         api: API_URL,
         searchState: SEARCH_STATE,
         page,
         size,
         onData: ({ list }) => renderTable3(list),
         onPaging: ({ page, totalPages }) =>
-            renderPagination({
+            Util.renderPagination({
                 container: 'pagination',
                 page,
                 totalPages,
@@ -803,4 +807,39 @@ function replaceFileInput(input, file) {
     const dt = new DataTransfer();
     dt.items.add(file);
     input.files = dt.files;
+}
+/***********
+3️⃣ JS 추가 (initFileInput() 아래에 그대로 붙이세요)
+***********/
+function initDropZone() {
+    const dropZone = document.getElementById("dropZone");
+    const realFile = document.getElementById("realFile");
+
+    // 클릭 → 파일 선택
+    dropZone.addEventListener("click", () => realFile.click());
+
+    ["dragenter", "dragover"].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+    });
+
+    ["dragleave", "drop"].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+        });
+    });
+
+    dropZone.addEventListener("drop", async e => {
+        const file = e.dataTransfer.files[0];
+        if (!file || !file.type.startsWith("image/")) return alert("이미지만 가능합니다.");
+
+        const optimized = await resizeImage(file, 1280);
+        replaceFileInput(realFile, optimized);
+
+        document.getElementById("fileName").textContent = optimized.name;
+        document.getElementById("previewImg").src = URL.createObjectURL(optimized);
+    });
 }

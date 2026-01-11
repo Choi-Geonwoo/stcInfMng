@@ -299,6 +299,7 @@ select {
   align-items: center;
   overflow: hidden;   /* 박스를 벗어난 이미지 숨김 */
   background: #f5f5f5;
+  cursor: pointer;
 }
 
 .img-preview-box img {
@@ -312,6 +313,11 @@ select {
     max-height: 100%;
     object-fit: contain;           /* 🔥 핵심 */
     border-radius: 10px;
+}
+
+.img-preview-box.dragover {
+    border: 2px dashed #4caf50;
+    background: #f1fff1;
 }
 
 /* ==============================

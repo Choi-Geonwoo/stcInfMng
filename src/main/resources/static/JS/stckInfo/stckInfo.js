@@ -1,13 +1,14 @@
-import { request } from '/JS/util/fetchUtil.js';
+/*import { Util.request } from '/JS/util/fetchUtil.js';
 import {
-    populateTableCommon,
-    initRowHandler,
-    extractRowData
+    Util.populateTableCommon,
+    Util.initRowHandler,
+    Util.extractRowData
 } from '/JS/util/TableCommonUitl.js';
-import { loadPageDataCommon } from '/JS/util/loadPageDataCommon.js';
-import { renderPagination } from '/JS/util/pagination.js';
-import { loadListCommon_n, loadListCommon  } from '/JS/util/loadListUitl.js';
+import { Util.loadPageDataCommon } from '/JS/util/Util.loadPageDataCommon.js';
+import { Util.renderPagination } from '/JS/util/pagination.js';
+import { Util.Util.loadListCommon_n, Util.loadListCommon  } from '/JS/util/loadListUitl.js';*/
 
+import * as Util from '/JS/util/index.js';
 /* -------------------------------------------------------------------------- */
 /*                                   DOM ID                                   */
 /* -------------------------------------------------------------------------- */
@@ -111,8 +112,8 @@ async function initPage() {
 /* -------------------------------------------------------------------------- */
 async function loadSelectOptions() {
     const [stckList, ntnList] = await Promise.all([
-        loadListCommon_n('/stckInfo/getSelectAll'),
-        loadListCommon_n('/ntnInfo/getAll')
+        Util.loadListCommon_n('/stckInfo/getSelectAll'),
+        Util.loadListCommon_n('/ntnInfo/getAll')
     ]);
 
     STCKNM_OPTIONS = stckList.map(v => ({
@@ -124,7 +125,9 @@ async function loadSelectOptions() {
         value: v.NTNCD,
         label: v.NTNNM
     }));
-    loadListCommon("/ntnInfo/getAll", ["ntnCd", "s_ntnCd"], "NTNCD", "NTNNM");
+
+//    Util.loadListCommon("/ntnInfo/getAll", ["ntnCd", "s_ntnCd"], "NTNCD", "NTNNM");
+    Util.loadListCommon("/common/getSelectAll/NTNINFO", ["ntnCd","s_ntnCd"], "NTNCD", "NTNNM");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -142,19 +145,19 @@ async function onSubmit() {
 
     try {
 
-        const fields = ["ntncd","stcktea", "stcknm", "alctn"];
+        /*const fields = ["ntncd","stcktea", "stcknm", "alctn"];
         for(const f of fields){
             const val = document.getElementById(f).value;
-            if(!val && f !== "dvdnd") return alert("필수 입력값을 확인하세요.");
-        }
+            if(!val && f !== "dvdnd") return Util.AppAlert("필수 입력값을 확인하세요.");
+        }*/
 
 
-        await request(API_URL.CREATE, 'POST', data);
-        alert('등록 성공');
+        await Util.request(API_URL.CREATE, 'POST', data);
+        Util.AppAlert('등록 성공');
         loadStckDlngDsctn(1);
     } catch (err) {
         console.error(err);
-        alert('등록 실패');
+        Util.AppAlert('등록 실패');
     }
 }
 
@@ -177,14 +180,14 @@ function onSearch() {
 /*                             LOAD + PAGINATION                               */
 /* -------------------------------------------------------------------------- */
 async function loadStckDlngDsctn(page = 1, size = 10) {
-    await loadPageDataCommon({
+    await Util.loadPageDataCommon({
         api: API_URL,
         searchState: SEARCH_STATE,
         page,
         size,
         onData: ({ list }) => renderTable(list),
         onPaging: ({ page, totalPages }) =>
-            renderPagination({
+            Util.renderPagination({
                 container: 'pagination',
                 page,
                 totalPages,
@@ -198,18 +201,18 @@ async function loadStckDlngDsctn(page = 1, size = 10) {
 /*                               TABLE HANDLER                                */
 /* -------------------------------------------------------------------------- */
 function bindTableHandlers() {
-    initRowHandler(DOM_ID.TABLE_BODY, {
+    Util.initRowHandler(DOM_ID.TABLE_BODY, {
         onEdit: async (id, tr) => {
             if (isEditing) return;
             isEditing = true;
 
             try {
-                const data = extractRowData(tr);
-                await request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
-                alert('수정 완료');
+                const data = Util.extractRowData(tr);
+                await Util.request(`${API_URL.UPDATE_BASE}/${id}`, 'POST', data);
+                Util.AppAlert('수정 완료');
             } catch (err) {
                 console.error(err);
-                alert('수정 실패');
+                Util.AppAlert('수정 실패');
             } finally {
                 isEditing = false;
             }
@@ -221,7 +224,7 @@ function bindTableHandlers() {
 /*                               RENDER TABLE                                 */
 /* -------------------------------------------------------------------------- */
 function renderTable(data) {
-    populateTableCommon(
+    Util.populateTableCommon(
         DOM_ID.TABLE_BODY,
         data,
         [

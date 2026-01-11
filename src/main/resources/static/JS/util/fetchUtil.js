@@ -11,7 +11,7 @@ export const request = async (url, method = 'GET', data = null) => {
 
     if (data) {
       if (method.toUpperCase() === 'GET') {
-        const params = new URLSearchParams(data).toString();
+        const params = new URLSearchParams(data.replace("$", "").replace("\\", "")).toString();
         url += `?${params}`;
       } else {
         options.headers = { 'Content-Type': 'application/json' };

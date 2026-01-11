@@ -111,11 +111,12 @@ async function handleCreate() {
     const useYn = document.getElementById(DOM_ID.SELECT_USEYN).value;
     const delYn = document.getElementById(DOM_ID.SELECT_DELYN).value;
 
-    const fields = ["bnCd","bnNm"];
-    for(const f of fields){
-        const val = document.getElementById(f).value;
-        if(!val && f !== "dvdnd") return await Util.AppAlert("필수 입력값을 확인하세요.");
-    }
+    const targetIds = ['bnCd', 'bnNm'];
+      // 공통 모듈 호출
+    const formDataCheck = validateInputs(targetIds);
+
+    if (!formDataCheck) return;
+
     const data = { bnCd, bnNm, useYn, delYn };
 
     try {
