@@ -7,17 +7,26 @@
  */
 export const request = async (url, method = 'GET', data = null) => {
   try {
-    const options = { method };
+        const options = { method };
 
-    if (data) {
-      if (method.toUpperCase() === 'GET') {
-        const params = new URLSearchParams(data.replace("$", "").replace("\\", "")).toString();
-        url += `?${params}`;
-      } else {
-        options.headers = { 'Content-Type': 'application/json' };
-        options.body = JSON.stringify(data);
-      }
-    }
+        if (data) {
+          const isGetMethod = method?.toUpperCase() === 'GET';
+
+          if (isGetMethod) {
+            // 1. 문자열인 경우 특수문자 제거, 객체인 경우 그대로 사용 (상황에 맞게 조절)
+            const cleanData = data.replace(/[^0-9.]/g, "");
+
+            // 2. 쿼리 스트링 생성
+            const params = new URLSearchParams(cleanData).toString();
+            if (params) {
+              url += url.includes('?') ? `&${params}` : `?${params}`;
+            }
+          } else {
+            // POST, PUT 등 Body가 필요한 요청
+            options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+            options.body = JSON.stringify(data);
+          }
+        }
 
     const response = await fetch(url, options);
 

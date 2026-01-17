@@ -106,6 +106,7 @@ public class StckDlngDsctnController {
             @RequestParam(required = false) String bncd,
             @RequestParam(required = false) String stcktea,
             @RequestParam(required = false) String clsf,
+            @RequestParam(required = false) String byngyn,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size    ) {
 
@@ -117,6 +118,7 @@ public class StckDlngDsctnController {
         map.put("page", page);
         map.put("size", size);
         map.put("clsf", clsf);
+        map.put("byngyn", byngyn);
         PageResponse<Map<String, Object>> result = stckDlngDsctnService.findById(map);
 
         return ResponseEntity.ok(

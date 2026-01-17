@@ -153,5 +153,8 @@
         <if test='clsf != null and clsf != ""'>
             AND A.CLSF = #{clsf}
         </if>
+        <if test='byngyn != null and byngyn != ""'>
+            AND A.BYNGYN = #{byngyn}
+        </if>
     </sql>
 </mapper>

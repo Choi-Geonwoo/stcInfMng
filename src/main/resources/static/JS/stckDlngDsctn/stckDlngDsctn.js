@@ -26,7 +26,8 @@ const DOM_ID = {
         DLNGYMD: 's_dlngYmd',
         BNCD: 's_bnCd',
         STCKTEA: 's_stckTea',
-        CLSF : 's_clsf'
+        CLSF : 's_clsf',
+        BYNGYN : 's_byngyn'
     }
 };
 
@@ -140,6 +141,7 @@ async function onSearch() {
         bncd: getQueryVal(DOM_ID.SEARCH_INPUTS.BNCD),
         stcktea: getQueryVal(DOM_ID.SEARCH_INPUTS.STCKTEA),
         clsf: getQueryVal(DOM_ID.SEARCH_INPUTS.CLSF),
+        byngyn: getQueryVal(DOM_ID.SEARCH_INPUTS.BYNGYN),
     };
 
     // 검색 모드로 전환

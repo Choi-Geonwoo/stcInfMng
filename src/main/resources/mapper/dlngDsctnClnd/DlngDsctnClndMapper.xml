@@ -20,6 +20,13 @@
             ON A.STCKTEA = C.STCKTEA
         WHERE 1=1
           AND A.DELYN = 'N'
+          <!--
+
+        <![CDATA[
+          AND a.DLNGYMD >= #{startDate}
+          AND a.DLNGYMD < #{endDate}
+        ]]>
+          -->
         ORDER BY
             A.DLNGYMD,
             C.STCKNM

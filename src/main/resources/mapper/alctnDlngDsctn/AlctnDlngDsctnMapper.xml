@@ -113,6 +113,7 @@
             AND B.NTNCD = #{ntnCd}                /* 국가코드 필터링 */
         </if>
         GROUP BY B.NTNNM, ROLLUP(TO_CHAR(TO_DATE(DLNGYMD), 'YYYY'))
+        ORDER BY DLNGYMD
     </select>
 
 

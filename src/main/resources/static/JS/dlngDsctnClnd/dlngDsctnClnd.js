@@ -34,6 +34,8 @@ function getCalendarOptions() {
  * Event Load
  * ============================== */
 function loadEvents(fetchInfo, successCallback, failureCallback) {
+    const start = fetchInfo.startStr;
+    const end = fetchInfo.endStr;
     fetchJson('/dlngDsctnClnd/getAll')
         .then(data => successCallback(data))
         .catch(err => {
