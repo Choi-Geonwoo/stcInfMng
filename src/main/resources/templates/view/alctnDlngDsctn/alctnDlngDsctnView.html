@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" th:href="@{/CSS/com/com.css}">
     <script type="module"   th:src="@{/JS/alctnDlngDsctn/alctnDlngDsctn.js}" defer></script>
     <script type="text/javascript" th:src="@{/JS/com/comUitl.js}" defer></script>
+    <script type="text/javascript" th:src="@{/JS/com/todayUitl.js}" defer></script>
 
     <!-- Chart.js로 차트 그리기 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -152,16 +153,19 @@
         </div>
     </div>
     <div class="tab-content" id="tab-weekly">
-        <h3>주간 테이블 내용</h3>
+        <div >
+            <h3>주간 테이블 내용</h3>
+            <button type="button" id="excelBtn" class="btn btn-excel">엑셀 다운로드</button>
+        </div>
         <div class="table-wrapper">
-            <table>
+            <table id="listTable">
                 <thead>
                 <tr>
-                    <th>배당일자</th>
-                    <th>국가명</th>
-                    <th>주식명</th>
-                    <th>배당금</th>
-                    <th>거래금액</th>
+                    <th data-key="DLNGYMD">배당일자</th>
+                    <th data-key="STCKNM">국가명</th>
+                    <th data-key="NTNNM">주식명</th>
+                    <th data-key="DVDND">배당금</th>
+                    <th data-key="DLNGAMT">거래금액</th>
                 </tr>
                 </thead>
                 <tbody id="weeklyList"></tbody>

@@ -1,7 +1,10 @@
 package com.example.demo.alctnDlngDsctn.controller;
 
 import com.example.demo.alctnDlngDsctn.service.AlctnDlngDsctnService;
+import com.example.demo.util.excel.ExcelMapDownloadUtil;
+import com.example.demo.util.excel.ExcelTableRequest;
 import com.example.demo.util.pagination.PageResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -232,5 +235,40 @@ public class AlctnDlngDsctnController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.noContent().build(); // 204 No Content
+    }
+
+
+
+    /** 주식정보 엑셀 다운로드 */
+    @PostMapping("/excel")
+    public void downloadBankExcel(
+            @RequestBody ExcelTableRequest request,
+            @RequestParam(required = false) String stckTea,
+            @RequestParam(required = false) String bnCd,
+            @RequestParam(required = false) String dlngYmd,
+            @RequestParam(required = false) String month,
+            @RequestParam(required = false) String ntnCd,
+            HttpServletResponse response
+    ) throws IOException {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("page", 1);
+        map.put("size", Integer.MAX_VALUE); // 엑셀은 사실상 전체
+        map.put("stckTea", stckTea);
+        map.put("bnCd", bnCd);
+        map.put("dlngYmd", dlngYmd);
+        map.put("month", month);
+        map.put("ntnCd", ntnCd);
+        // 예: MyBatis Map 결과
+        PageResponse<Map<String, Object>> page =
+                alctnDlngDsctnService.getWeeklyAll(map);
+        List<Map<String, Object>> data = page.getList(); // ✅ 핵심
+        ExcelMapDownloadUtil.download(
+                response,
+                "bank_trade_list",
+                "Bank",
+                data,
+                request.getColumns()
+        );
     }
 }

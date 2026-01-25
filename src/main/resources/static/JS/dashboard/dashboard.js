@@ -75,7 +75,7 @@ function renderSummary(d) {
     DOM.totalInvest.innerText   = num(d.TOTALINVEST);
     DOM.totalDividend.innerText = num(d.TOTALDIVIDEND);
     DOM.avgDividend.innerText   = num(d.AVGDIVIDEND);
-    DOM.stockCount.innerText    = num(d.STOCKCOUNT);
+    DOM.stockCount.innerText    = d.STOCKCOUNT;
 }
 
 /* ================= TABLE ================= */

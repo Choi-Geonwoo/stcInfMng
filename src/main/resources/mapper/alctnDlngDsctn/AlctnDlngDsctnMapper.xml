@@ -11,8 +11,8 @@
               A.ALCTNDLNGDSCTN_NO       /* 배당거래내역 번호 (순번) */
             , SUBSTR(A.DLNGYMD, 1, 7) AS DLNG_YM   /* 거래 년월 */
             , C.STCKNM                  /* 주식명 */
-            , A.DVDND                   /* 배당금 */
-            , A.DLNGAMT                  /* 거래금액 */
+            , FN_FORMAT_AMOUNT(A.DVDND, B.NTNCD ) AS DVDND                   /* 배당금 */
+            , FN_FORMAT_AMOUNT(A.DLNGAMT, B.NTNCD ) AS DLNGAMT                  /* 거래금액 */
             , B.NTNNM                   /*국가명*/
             , A.BNCD
         FROM ALCTNDLNGDSCTN A /* 배당거래내역 테이블 */

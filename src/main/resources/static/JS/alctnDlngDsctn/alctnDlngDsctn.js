@@ -35,7 +35,8 @@ const DOM_ID = {
 
 const API_URL = {
     GET_ALL: '/alctnDlngDsctn/getWeeklyAll',
-    SEARCH: '/alctnDlngDsctn/getWeeklyAll'
+    SEARCH: '/alctnDlngDsctn/getWeeklyAll',
+    EXCEL_BASE: '/alctnDlngDsctn/excel'
 };
 
 /**
@@ -62,6 +63,7 @@ async function init() {
     document.getElementById('searchBtn')?.addEventListener('click', searchStockInfo);
     document.getElementById('registerBtn')?.addEventListener('click', openRegisterModal);
     document.getElementById("stckTea")?.addEventListener("change", e => onChangeStock(e.target.value));
+    document.getElementById("excelBtn").addEventListener("click", downloadBankExcel);
 
     document.querySelectorAll('.modal-close-btn, .btn-cancel').forEach(btn =>
         btn.addEventListener('click', closeModal)
@@ -841,5 +843,24 @@ function initDropZone() {
 
         document.getElementById("fileName").textContent = optimized.name;
         document.getElementById("previewImg").src = URL.createObjectURL(optimized);
+    });
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               엑셀 다운로드                                  */
+/* -------------------------------------------------------------------------- */
+function downloadBankExcel() {
+    const params = new URLSearchParams({
+        stckTea: getVal('s_stckTea'),
+        bnCd: getVal('s_bnCd'),
+        dlngYmd: getVal('s_dlngYmd'),
+        month : getVal('s_month'),
+        ntnCd : getVal('s_ntnCd')
+    });
+
+    Util.downloadExcelFromTable({
+        tableId: 'listTable',
+        url: API_URL.EXCEL_BASE+ `?${params}`,
+        fileName: '배당거래내역정보_'+getToday("YYYY-MM-DD")
     });
 }

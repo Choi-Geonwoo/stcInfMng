@@ -64,34 +64,41 @@
         설명: 주식별 투자 랭킹을 조회합니다.
 
         주식별 투자 랭킹을 조회합니다.
-        주식 코드, 주식명, 총 투자 금액, 총 배당 금액, 현재 보유 수량을 기준으로 상위 10개 종목을 반환합니다.
+        배당금 기준으로 상위 10개 종목을 반환합니다.
     -->
     <select id="getStockRank" resultType="map">
-        SELECT  /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getMonthly - 대시보드 주식별 투자 랭킹 */
+        SELECT  /* SQL : com.example.demo.dashboard.mapper.DashboardMapper.getStockRank - 대시보드 주식별 투자 랭킹 배당금 기준 */
             *
         FROM (
+
             SELECT
-                  i.STCKTEA  /* 주식티커 */
-                , i.STCKNM   AS name /* 주식명  */
-                , N.NTNNM    AS country
+                  A.STCKTEA  /* 주식티커 */
+                , B.STCKNM   AS name /* 주식명  */
+                , D.NTNNM    AS country
                 , sum(A.DLNGAMT) AS invest
-                , max(nvl(b.qty, 0)) AS qty
-                , ROW_NUMBER() OVER(PARTITION BY N.NTNNM ORDER BY sum(A.DLNGAMT) DESC) AS RN
-            FROM STCKINFO I
-            LEFT JOIN ALCTNDLNGDSCTN A
-                ON I.STCKTEA = A.STCKTEA
-                   AND A.DELYN = 'N'
-            LEFT JOIN STOCK_BALANCE B
-                ON I.STCKINFO_NO = B.STCKINFO_NO
-                    AND B.DELYN = 'N'
-            LEFT JOIN NTNINFO N
-                ON  I.NTNCD = N.NTNCD
-                    AND N.DELYN = 'N'
-            WHERE I.DELYN = 'N'
+                , max(nvl(C.qty, 0)) AS qty
+                , ROW_NUMBER() OVER(PARTITION BY D.NTNNM ORDER BY sum(A.DLNGAMT) DESC) AS RN
+            FROM
+                ALCTNDLNGDSCTN A
+            LEFT OUTER JOIN STCKINFO B
+                ON A.STCKTEA = B.STCKTEA
+            LEFT OUTER JOIN
+                (
+                SELECT
+                    STCKINFO_NO,
+                    SUM(QTY) AS QTY
+                FROM
+                    STOCK_BALANCE
+                GROUP BY
+                    STCKINFO_NO
+                ) C
+                ON B.STCKINFO_NO = C.STCKINFO_NO
+            LEFT OUTER JOIN NTNINFO D
+                ON B.NTNCD = D.NTNCD
             GROUP BY
-                  i.STCKTEA  /* 주식티커 */
-                , i.STCKNM   /* 주식명  */
-                , N.NTNNM
+                  A.STCKTEA
+                , B.STCKNM
+                , D.NTNNM
         )
         WHERE RN <![CDATA[ <= ]]>  10
         ORDER BY country
