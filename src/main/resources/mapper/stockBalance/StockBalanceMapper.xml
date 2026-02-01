@@ -144,6 +144,9 @@
         <if test='alctn != null and alctn != ""'>
             AND A.ALCTN = #{alctn}
         </if>
+        <if test='excel == "Y"'>
+            AND NVL(C.QTY, 0) > 0
+        </if>
     </sql>
 
 </mapper>

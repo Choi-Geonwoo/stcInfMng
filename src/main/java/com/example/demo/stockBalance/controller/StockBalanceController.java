@@ -43,6 +43,7 @@ public class StockBalanceController {
         Map<String, Object> map = new HashMap<>();
         map.put("useYn", "Y");
         map.put("delYn", "N");
+        map.put("excel", "N");
 //        model.addAttribute("nList", ntnInfoService.getAll(map));
         return "view/stockBalance/stockBalanceView";
     }
@@ -150,6 +151,7 @@ public class StockBalanceController {
         Map<String, Object> map = new HashMap<>();
         map.put("page", 1);
         map.put("size", Integer.MAX_VALUE); // 엑셀은 사실상 전체
+        map.put("excel", "Y");
         // 예: MyBatis Map 결과
         PageResponse<Map<String, Object>> page =
                 stckInfoService.getAll(map);

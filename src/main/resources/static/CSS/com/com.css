@@ -623,3 +623,9 @@ border-spacing:12px 16px;
     line-height: 1.4;
     opacity: 0.9;
 }
+
+.header-wrap {
+    display: flex;
+    justify-content: space-between; /* 양쪽 끝으로 배치 */
+    align-items: center;           /* 세로 가운데 정렬 */
+}
