@@ -4,7 +4,7 @@
  * @param {val} value - null 체크
  * @returns {boodle} 공백여부
  */
-function isEmpty(value) {
+export function isEmpty(value) {
   return (
         value == null ||               // null 또는 undefined
         value === '' ||               // 빈 문자열
@@ -15,15 +15,15 @@ function isEmpty(value) {
 /* -------------------------------------------------------------------------- */
 /*                              Input 헬퍼 함수                                 */
 /* -------------------------------------------------------------------------- */
-function getVal(id) {
+export function getVal(id) {
     return document.getElementById(id)?.value || "";
 }
 
-function getQueryVal(id) {
+export function getQueryVal(id) {
     return document.getElementById(id)?.value?.trim() || "";
 }
 
-function clearTable() {
+export function clearTable() {
     document.getElementById(DOM_ID.TABLE_BODY).innerHTML = "";
 }
 

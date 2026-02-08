@@ -167,10 +167,10 @@ async function onSubmit() {
 function onSearch() {
     SEARCH_STATE.mode = 'search';
     SEARCH_STATE.params = {
-        ntnCd: getQueryVal(DOM_ID.SEARCH_INPUTS.NTNCD),
-        stckTea: getQueryVal(DOM_ID.SEARCH_INPUTS.STCKTEA),
-        stckNm: getQueryVal(DOM_ID.SEARCH_INPUTS.STCKNM),
-        alctn: getQueryVal(DOM_ID.SEARCH_INPUTS.ALCTN)
+        ntnCd: Util.getQueryVal(DOM_ID.SEARCH_INPUTS.NTNCD),
+        stckTea: Util.getQueryVal(DOM_ID.SEARCH_INPUTS.STCKTEA),
+        stckNm: Util.getQueryVal(DOM_ID.SEARCH_INPUTS.STCKNM),
+        alctn: Util.getQueryVal(DOM_ID.SEARCH_INPUTS.ALCTN)
     };
 
     loadStckDlngDsctn(1);

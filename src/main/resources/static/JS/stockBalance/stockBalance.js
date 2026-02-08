@@ -113,9 +113,9 @@ function renderTable(data, page, size) {
             type: 'button',
             buttons: row => [
                 {   // 등록
-                    action: isEmpty(row.STOCK_BALANCE_NO) ? 'add' : 'edit',
-                    class:  isEmpty(row.STOCK_BALANCE_NO)  ? 'btn btn-add' : 'btn btn-edit',
-                    label:   isEmpty(row.STOCK_BALANCE_NO)  ? '등록' : '수정'
+                    action: Util.isEmpty(row.STOCK_BALANCE_NO) ? 'add' : 'edit',
+                    class:  Util.isEmpty(row.STOCK_BALANCE_NO)  ? 'btn btn-add' : 'btn btn-edit',
+                    label:  Util.isEmpty(row.STOCK_BALANCE_NO)  ? '등록' : '수정'
                 }
             ]
         }
@@ -197,8 +197,12 @@ async  function onDlls(id, tr) {
         if (!changed) return;
 
         const res = await Util.request(`/stockBalance/dlls/${id}`, 'GET');
-        if (!res || !res.data) return;
-
+        console.log((!res || !res.data || res.data.length));
+        if (!res || !res.data || !res.data.list.length){
+            await Util.AppAlert("데이터 없음");
+            return;
+        }
+        console.log(res.data.list.length);
         document.getElementById("stcknm").innerHTML = res.data.list[0].STCKNM;
         document.getElementById("ntnnm").innerHTML = res.data.list[0].NTNNM;
         document.getElementById("tot_sun").innerHTML = res.data.list[0].TOT_SUN;
@@ -238,7 +242,7 @@ function downloadBankExcel() {
     Util.downloadExcelFromTable({
         tableId: 'bankTable',
         url: API_URL.EXCEL_BASE,
-        fileName: '주식수량정보_'+getToday("YYYY-MM-DD")
+        fileName: '주식수량정보_'+Util.getToday("YYYY-MM-DD")
     });
 }
 

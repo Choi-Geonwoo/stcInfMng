@@ -227,37 +227,44 @@ function setSelectValue(selectId, value, list, valKey, textKey) {
 /* ----------------------------------------------------------- */
 /* 1. 데이터 그룹 구조                                            */
 /* ----------------------------------------------------------- */
- function groupByStockYearMonth(list){
-     const map = {};
-     const yearSet = new Set();
+function groupByStockYearMonth(list) {
+    const map = {};
+    const stockYearPairs = []; // [{name: 'BAC', year: '2024'}, ...]
 
-     list.forEach(item=>{
-         const name = item.STCKNM;
-         const ym = item.DLNG_YM;          // 2024-03
-         const year = ym.slice(0,4);
-         const month = ym.slice(5,7);
+    list.forEach(item => {
+        const name = item.STCKNM;
+        const ym = item.DLNG_YM;
+        const year = ym.slice(0, 4);
+        const month = ym.slice(5, 7);
 
-         yearSet.add(year);
+        // 1. 데이터 맵 구축
+        if (!map[name]) map[name] = {};
+        if (!map[name][year]) {
+            map[name][year] = {};
+            // 2. 종목과 연도의 쌍을 등록 (중복 방지)
+            stockYearPairs.push({ name, year });
+        }
+        if (!map[name][year][month]) map[name][year][month] = [];
 
-         if(!map[name]) map[name] = {};
-         if(!map[name][year]) map[name][year] = {};
-         if(!map[name][year][month]) map[name][year][month] = [];
+        map[name][year][month].push(item);
+    });
 
-         map[name][year][month].push(item);
-     });
+    // 종목명 순, 그 다음 연도 순으로 정렬
+    stockYearPairs.sort((a, b) => a.name.localeCompare(b.name) || a.year.localeCompare(b.year));
 
-     return { map, years: [...yearSet].sort() };
- }
+    return { map, stockYearPairs };
+}
+
 /* ----------------------------------------------------------- */
 /* 1. 메인 함수                                                  */
 /* ----------------------------------------------------------- */
-function populateTable(list){
-    const { map, years } = groupByStockYearMonth(list);
-    const stockNames = Object.keys(map);
+function populateTable(list) {
+    const { map, stockYearPairs } = groupByStockYearMonth(list);
 
+    // 헤더와 바디에 동일한 stockYearPairs 전달
     const html = [
-        renderHeader(stockNames, years),
-        renderBody(map, stockNames, years)
+        renderHeader(stockYearPairs),
+        renderBody(map, stockYearPairs)
     ].join('');
 
     const container = document.getElementById("dataList");
@@ -285,46 +292,44 @@ function groupByStockAndMonth(list) {
 /* ----------------------------------------------------------- */
 /*3. 헤더 렌더링                                                 */
 /* ----------------------------------------------------------- */
-function renderHeader(stockNames, years){
-    let html = `<div class="compare-header"><div class="compare-title">월</div>`;
-    stockNames.forEach(name=>{
-        years.forEach(year=>{
-                html += `<div class="compare-title">${name}<br>${year}</div>`;
-        });
-    });
+function renderHeader(stockYearPairs) {
+    const cols = stockYearPairs.map(pair =>
+        `<div class="compare-title">${pair.name}<br>${pair.year}</div>`
+    ).join('');
 
-    html += `</div>`;
-    return html;
+    return `<div class="compare-header">
+                <div class="compare-title">월</div>
+                ${cols}
+            </div>`;
 }
 
 /* ----------------------------------------------------------- */
 /*4. 바디 렌더링                                                 */
 /* ----------------------------------------------------------- */
-function renderBody(map, stockNames, years){
-    let html = '';
+function renderBody(map, stockYearPairs) {
+    const rows = Array.from({ length: 12 }, (_, i) => {
+        const m = i + 1;
+        const month = String(m).padStart(2, '0');
 
-    for(let m=1;m<=12;m++){
-        const month = String(m).padStart(2,'0');
-        html += `<div class="compare-row"><div class="compare-cell">${m}월</div>`;
+        const cells = stockYearPairs.map(pair => {
+            const items = map[pair.name]?.[pair.year]?.[month];
+            const item = (items && items.length > 0) ? items[items.length - 1] : null;
 
-        stockNames.forEach(name=>{
-            years.forEach(year=>{
-                const items = map[name]?.[year]?.[month];
-                const item = items ? items[items.length-1] : null;
+            return item ? `
+                <div class="compare-cell detail-cell" data-id="${item.ALCTNDLNGDSCTN_NO}">
+                    <div class="dlng">${item.DLNG_YM}</div>
+                    <div class="dlgamt">${item.DLNGAMT}</div>
+                </div>`
+                : `<div class="compare-cell"></div>`; // 데이터 없는 달만 빈칸 처리
+        }).join('');
 
-                html += item ? `
-                    <div class="compare-cell detail-cell"
-                         data-id="${item.ALCTNDLNGDSCTN_NO}">
-                        <div class="dlng">${item.DLNG_YM}</div>
-                        <div class="dlgamt">${item.DLNGAMT}</div>
-                    </div>`
-                    : `<div class="compare-cell"></div>`;
-            });
-        });
+        return `<div class="compare-row">
+                    <div class="compare-cell">${m}월</div>
+                    ${cells}
+                </div>`;
+    });
 
-        html += `</div>`;
-    }
-    return html;
+    return rows.join('');
 }
 
 /* ----------------------------------------------------------- */
@@ -379,19 +384,19 @@ function renderTable3(data) {
  */
 async function searchStockInfo() {
     const params = new URLSearchParams({
-        stckTea: getVal('s_stckTea'),
-        bnCd: getVal('s_bnCd'),
-        dlngYmd: getVal('s_dlngYmd'),
-        month : getVal('s_month'),
-        ntnCd : getVal('s_ntnCd')
+        stckTea: Util.getVal('s_stckTea'),
+        bnCd: Util.getVal('s_bnCd'),
+        dlngYmd: Util.getVal('s_dlngYmd'),
+        month : Util.getVal('s_month'),
+        ntnCd : Util.getVal('s_ntnCd')
     });
 
     const paramsObj = {
-            stckTea: getVal('s_stckTea'),
-            bnCd: getVal('s_bnCd'),
-            dlngYmd: getVal('s_dlngYmd'),
-            month : getVal('s_month'),
-            ntnCd : getVal('s_ntnCd')
+            stckTea: Util.getVal('s_stckTea'),
+            bnCd: Util.getVal('s_bnCd'),
+            dlngYmd: Util.getVal('s_dlngYmd'),
+            month : Util.getVal('s_month'),
+            ntnCd : Util.getVal('s_ntnCd')
         };
 
     // 검색 모드로 전환
@@ -644,14 +649,14 @@ function delModal() {
  * @param {Array} rawData - 차트 렌더링에 사용될 원본 데이터
  */
 function fn_chart(rawData) {
-    lastRawData = rawData; // 마지막 데이터 저장
+    if (!rawData || rawData.length === 0) return;
+    lastRawData = rawData;
 
     const canvas = document.getElementById("monthlyChart");
-    if (!canvas) return console.error("monthlyChart canvas not found");
+    if (!canvas) return;
 
     const tabMonth = document.getElementById("tab-month");
-    const style = window.getComputedStyle(tabMonth);
-    if (style.display === "none") return;
+    if (window.getComputedStyle(tabMonth).display === "none") return;
 
     if (chartObj) chartObj.destroy();
 
@@ -661,43 +666,76 @@ function fn_chart(rawData) {
     ];
     const monthLabels = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
-    const filteredData = rawData.filter(item => item.DLNGYMD !== "합계 (한국)" && item.DLNGYMD !== "합계 (미국)");
+    // '합계'가 포함된 행은 제외하고 연도별 데이터만 필터링
+    const filteredData = rawData.filter(item => !item.DLNGYMD.includes("합계"));
 
-    const datasets = filteredData.map(item => ({
-        label: item.DLNGYMD,
-        data: monthKeys.map(key => item[key]),
-        borderWidth: 2,
-        fill: false
-    }));
+    chartObj = new Chart(canvas, {
+        data: {
+            labels: monthLabels,
+            datasets: filteredData.map(item => {
+                const isUSA = item.DLNGYMD.includes("미국") || item.DLNGYMD.includes("US");
+                const baseColor = getRandomColor(1); // 테두리용 (불투명)
+                const bgColor = baseColor.replace('1)', '0.2)'); // 배경용 (연하게)
 
-chartObj = new Chart(canvas, {
-    type: "bar",
-    data: {
-        labels: monthLabels,
-        datasets: filteredData.map(item => ({
-            label: item.DLNGYMD,
-            data: monthKeys.map(key => item[key]),
-            type: item.DLNGYMD.includes("미국") ? 'line' : 'bar',
-            yAxisID: item.DLNGYMD.includes("미국") ? 'y1' : 'y',
-            borderWidth: 2
-        }))
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                position: 'left',
-                beginAtZero: true
+                return {
+                    label: item.DLNGYMD,
+                    // 문자열로 된 금액(콤마 등)을 숫자로 변환
+                    data: monthKeys.map(key => {
+                        const val = item[key];
+                        return typeof val === 'string' ? Number(val.replace(/[^0-9.-]+/g, "")) : val;
+                    }),
+                    type: isUSA ? 'line' : 'bar',
+                    yAxisID: isUSA ? 'y1' : 'y',
+                    // 랜덤 색상 적용
+                    borderColor: baseColor,
+                    backgroundColor: isUSA ? baseColor : bgColor, // 라인은 점 색상, 바는 채우기 색상
+                    borderWidth: 2,
+                    pointBackgroundColor: baseColor,
+                    tension: 0.3
+                };
+            })
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
             },
-            y1: {
-                position: 'right',
-                beginAtZero: true,
-                grid: { drawOnChartArea: false }
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: '한국 거래액' },
+                    beginAtZero: true
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: '미국 거래액' },
+                    beginAtZero: true,
+                    grid: { drawOnChartArea: false } // 오른쪽 축의 그리드 중첩 방지
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        // 툴팁에서도 포맷팅된 금액을 보여주고 싶을 때
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('ko-KR').format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
             }
         }
-    }
-});
+    });
 }
 
 /*-------------------------------------------------------------------------- */
@@ -851,16 +889,29 @@ function initDropZone() {
 /* -------------------------------------------------------------------------- */
 function downloadBankExcel() {
     const params = new URLSearchParams({
-        stckTea: getVal('s_stckTea'),
-        bnCd: getVal('s_bnCd'),
-        dlngYmd: getVal('s_dlngYmd'),
-        month : getVal('s_month'),
-        ntnCd : getVal('s_ntnCd')
+        stckTea: Util.getVal('s_stckTea'),
+        bnCd: Util.getVal('s_bnCd'),
+        dlngYmd: Util.getVal('s_dlngYmd'),
+        month : Util.getVal('s_month'),
+        ntnCd : Util.getVal('s_ntnCd')
     });
 
     Util.downloadExcelFromTable({
         tableId: 'listTable',
         url: API_URL.EXCEL_BASE+ `?${params}`,
-        fileName: '배당거래내역정보_'+getToday("YYYY-MM-DD")
+        fileName: '배당거래내역정보_'+Util.getToday("YYYY-MM-DD")
     });
+}
+
+
+/**
+ * 랜덤 RGBA 색상을 생성합니다.
+ * @param {number} alpha - 투명도 (0 ~ 1)
+ * @returns {string} rgba 색상 문자열
+ */
+function getRandomColor(alpha) {
+    const r = Math.floor(Math.random() * 255);
+    const g = Math.floor(Math.random() * 255);
+    const b = Math.floor(Math.random() * 255);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }

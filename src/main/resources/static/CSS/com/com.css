@@ -565,8 +565,8 @@ border-spacing:12px 16px;
 
 /**/
 .text-center{
-  text-align: center;      /* Centers content horizontally */
-  vertical-align: middle;  /* Centers content vertically */
+    text-align: center !important; /* 다른 스타일이 방해한다면 !important 추가 */
+    vertical-align: middle;
 }
 
 
@@ -628,4 +628,20 @@ border-spacing:12px 16px;
     display: flex;
     justify-content: space-between; /* 양쪽 끝으로 배치 */
     align-items: center;           /* 세로 가운데 정렬 */
+}
+
+/* 5번째, 8번째, 9번째 열을 동시에 숨김 */
+#bankTable.hide-columns th:nth-child(1),
+#bankTable.hide-columns td:nth-child(1),
+.hide-cols col:nth-child(1),
+#bankTable.hide-columns th:nth-child(8),
+#bankTable.hide-columns td:nth-child(8),
+.hide-cols col:nth-child(8),
+#bankTable.hide-columns th:nth-child(9),
+#bankTable.hide-columns td:nth-child(9),
+.hide-cols col:nth-child(9),
+#bankTable.hide-columns th:nth-child(10),
+#bankTable.hide-columns td:nth-child(10),
+.hide-cols col:nth-child(10){
+    display: none;
 }

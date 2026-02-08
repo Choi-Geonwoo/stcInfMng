@@ -95,10 +95,10 @@ async function init() {
 
     initTableHandlers();
 
-    document.getElementById("chkBox").addEventListener("change", function () {
-        const target = document.getElementById("target");
-        target.style.display = this.checked ? "none" : "block";
-    });
+document.getElementById("chkBox").addEventListener("change", function () {
+    const table = document.getElementById("bankTable");
+    table.classList.toggle("hide-columns", this.checked);
+});
 }
 
 /* -------------------------------------------------------------------------- */
@@ -106,14 +106,14 @@ async function init() {
 /* -------------------------------------------------------------------------- */
 async function onSubmit() {
     const data = {
-        dlngymd: getVal(DOM_ID.INPUTS.DLNGYMD),
-        bncd: getVal(DOM_ID.INPUTS.BNCD),
-        stcktea: getVal(DOM_ID.INPUTS.STCKTEA),
-        dlngamt: getVal(DOM_ID.INPUTS.DLNGAMT),
-        delyn: getVal(DOM_ID.INPUTS.DELYN),
-        clsf: getVal(DOM_ID.INPUTS.CLSF),
-        byngyn: getVal(DOM_ID.INPUTS.BYNGYN),
-        stckcnt: getVal(DOM_ID.INPUTS.STCKCNT)
+        dlngymd: Util.getVal(DOM_ID.INPUTS.DLNGYMD),
+        bncd: Util.getVal(DOM_ID.INPUTS.BNCD),
+        stcktea: Util.getVal(DOM_ID.INPUTS.STCKTEA),
+        dlngamt: Util.getVal(DOM_ID.INPUTS.DLNGAMT),
+        delyn: Util.getVal(DOM_ID.INPUTS.DELYN),
+        clsf: Util.getVal(DOM_ID.INPUTS.CLSF),
+        byngyn: Util.getVal(DOM_ID.INPUTS.BYNGYN),
+        stckcnt: Util.getVal(DOM_ID.INPUTS.STCKCNT)
     };
 
     try {
@@ -136,12 +136,12 @@ async function onSubmit() {
 /* -------------------------------------------------------------------------- */
 async function onSearch() {
     const params = {
-        start_dlngymd: getVal("s_start_dlngYmd"),
-        end_dlngymd: getVal("s_end_dlngYmd"),
-        bncd: getQueryVal(DOM_ID.SEARCH_INPUTS.BNCD),
-        stcktea: getQueryVal(DOM_ID.SEARCH_INPUTS.STCKTEA),
-        clsf: getQueryVal(DOM_ID.SEARCH_INPUTS.CLSF),
-        byngyn: getQueryVal(DOM_ID.SEARCH_INPUTS.BYNGYN),
+        start_dlngymd: Util.getVal("s_start_dlngYmd"),
+        end_dlngymd: Util.getVal("s_end_dlngYmd"),
+        bncd: Util.getQueryVal(DOM_ID.SEARCH_INPUTS.BNCD),
+        stcktea: Util.getQueryVal(DOM_ID.SEARCH_INPUTS.STCKTEA),
+        clsf: Util.getQueryVal(DOM_ID.SEARCH_INPUTS.CLSF),
+        byngyn: Util.getQueryVal(DOM_ID.SEARCH_INPUTS.BYNGYN),
     };
 
     // 검색 모드로 전환
@@ -278,7 +278,7 @@ function downloadBankExcel() {
     Util.downloadExcelFromTable({
         tableId: 'bankTable',
         url: '/stckDlngDsctn/excel/bank',
-        fileName: '주식거래내역_'+getToday("YYYY-MM-DD")
+        fileName: '주식거래내역_'+Util.getToday("YYYY-MM-DD")
     });
 }
 
