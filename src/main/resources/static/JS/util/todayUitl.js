@@ -7,7 +7,7 @@
  *                          제공되지 않거나 알 수 없는 형식인 경우 'YYYY-MM-DD'가 기본값으로 사용됩니다.
  * @returns {string} 형식화된 현재 날짜 문자열.
  */
-function getToday(format){
+export function getToday(format){
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed

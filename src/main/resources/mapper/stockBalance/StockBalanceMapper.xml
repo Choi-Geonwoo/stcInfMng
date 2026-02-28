@@ -116,13 +116,8 @@
             ,A.STCKNM      /*주식명*/
             ,A.ALCTN       /*배당주기*/
             ,NVL(C.QTY, 0) AS QTY         /*수량*/
-            ,(
-                SELECT
-                    FN_FORMAT_AMOUNT(SUM(DLNGAMT), A.NTNCD)
-                FROM
-                    ALCTNDLNGDSCTN TB
-                WHERE  TB.STCKTEA = A.STCKTEA
-            ) AS DLNGAMT                  /*거래금액*/
+            ,FN_FORMAT_AMOUNT(D.DLNGAMT, A.NTNCD) AS DLNGAMT                 /*거래금액 누적금액*/
+            ,FN_FORMAT_AMOUNT(D.AVG_DLNGAMT, A.NTNCD) AS AVG_DLNGAMT         /*거래금액 평균금액*/
             ,TO_CHAR(C.REGDAY, 'YYYY-MM-DD HH24:MI:SS') AS REGDAY
             ,TO_CHAR(C.MDFCNDAY, 'YYYY-MM-DD HH24:MI:SS') AS MDFCNDAY
             ,NVL(C.DELYN, 'N') AS DELYN
@@ -133,6 +128,16 @@
                 AND B.USEYN = 'Y')
         LEFT OUTER JOIN STOCK_BALANCE C /*주식수량*/
             ON (a.STCKINFO_NO  = C.STCKINFO_NO)
+        LEFT OUTER JOIN (
+                SELECT
+                    STCKTEA
+                    ,SUM(DLNGAMT) AS DLNGAMT
+                    ,AVG(DLNGAMT) AS AVG_DLNGAMT
+                FROM
+                ALCTNDLNGDSCTN TB
+                GROUP BY STCKTEA
+            ) D
+            ON (D.STCKTEA = A.STCKTEA)
         WHERE A.DELYN = 'N'
           AND A.USEYN = 'Y'
         <if test='ntnCd != null and ntnCd != ""'>

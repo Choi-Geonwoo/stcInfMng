@@ -108,6 +108,7 @@ function renderTable(data, page, size) {
         { key: 'ALCTN', type: 'label', dataField: 'alctn' },
         { key: 'QTY', type: 'text', dataField: 'qty' },
         { key: 'DLNGAMT', type: 'label', dataField: 'dlngamt' },
+        { key: 'AVG_DLNGAMT', type: 'label', dataField: 'avg_dlngamt' }, /*거래금액*/
         { key: 'DELYN', type: 'select', dataField: 'delyn', options: SELECT_OPTIONS.DELYN },
         {
             type: 'button',
@@ -135,7 +136,8 @@ function renderTable2(data, page, size) {
         { key: 'BNNM', type: 'label', dataField: 'bnnm' },       /*은행명*/
         { key: 'DLNGYMD', type: 'label', dataField: 'dlngymd' }, /*거래일자*/
         { key: 'DVDND', type: 'label', dataField: 'dvdnd' },     /*배당금*/
-        { key: 'DLNGAMT', type: 'label', dataField: 'dlngamt' } /*거래금액*/
+        { key: 'DLNGAMT', type: 'label', dataField: 'dlngamt' }, /*거래금액*/
+        { key: 'AVG_DLNGAMT', type: 'label', dataField: 'avg_dlngamt' } /*거래금액*/
     ], 'STCKINFO_NO', page, size);
 
     document.getElementById("modalOverlay").style.display = "flex";
